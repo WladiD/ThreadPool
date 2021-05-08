@@ -1,30 +1,29 @@
-{**
- * ThreadPool is a abstract class framework for creating specialized
- * pool of workers (TPoolWorker, separate threads) which are managed
- * by a manager (TPoolManager, also a thread)
- *
- *
- * License
- *
- * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
- *
- * The Original Code is ThreadPool.pas
- *
- * The Initial Developer of the Original Code is Waldemar Derr.
- * Portions created by Waldemar Derr are Copyright (C) 2021 Waldemar Derr.
- * All Rights Reserved.
- *
- *
- * @author Waldemar Derr <furevest@gmail.com>
- *}
+// ThreadPool is a abstract class framework for creating specialized
+// pool of workers (TPoolWorker, separate threads) which are managed
+// by a manager (TPoolManager, also a thread)
+//
+//
+// License
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 1.1 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// The Original Code is ThreadPool.pas
+//
+// The Initial Developer of the Original Code is Waldemar Derr.
+// Portions created by Waldemar Derr are Copyright (C) 2021 Waldemar Derr.
+// All Rights Reserved.
+//
+//
+// @author Waldemar Derr <furevest@gmail.com>
+
 unit ThreadPool;
 
 interface
@@ -49,78 +48,63 @@ const
   Version = '1.0.7';
 
 type
-  {**
-   * Class forward declarations
-   *}
+  // Class forward declarations
   TPoolTask = class;
   TPoolWorker = class;
   TPoolManager = class;
-  {**
-   * Class type declarations
-   *}
+
+  // Class type declarations
   TPoolTaskClass = class of TPoolTask;
   TPoolWorkerClass = class of TPoolWorker;
   TPoolManagerClass = class of TPoolManager;
-  {**
-   * Derived generic list types
-   *}
+
+  // Derived generic list types
   TWorkerList = TObjectList<TPoolWorker>;
   TTaskList = TObjectList<TPoolTask>;
-  {**
-   * Enumeration of possible states of a task
-   *
-   * @see TPoolTask
-   *}
+
+  // Enumeration of possible states of a task
+  //
+  // See TPoolTask
   TTaskState = (tsUnknown, tsInWork, tsError, tsSuccess);
-  {**
-   * Enumeration for common priorities of a task
-   *
-   * @see TPoolTask.Priority
-   *}
+
+  // Enumeration for common priorities of a task
+  //
+  // See TPoolTask.Priority
   TTaskPriority = (
     tpLowest = 0, tpLower = 1, tpLow = 2,
     tpNormal = 3,
     tpHigh = 4, tpHigher = 5, tpHighest = 255,
     tpCustom = -1);
-  {**
-   * Enumeration of possible states of a worker
-   *
-   * @see TPoolWorker
-   *}
+
+  // Enumeration of possible states of a worker
+  //
+  // See TPoolWorker
   TWorkerState = (wsReady, wsBusy, wsTaskDone);
-  {**
-   * Anonymous method for a task
-   *
-   * Compatible to TPoolTask.IsTheSame
-   *}
+
+  // Anonymous method for a task
+  //
+  // Compatible to TPoolTask.IsTheSame
   TTaskFunc = reference to function(Task: TPoolTask):Boolean;
-  {**
-   * Status event
-   *
-   * @param Progress Float value between 0 and 1. 1 = 100% = Complete.
-   *}
+
+  // Status event
+  //
+  // Progress - Float value between 0 and 1. 1 = 100% = Complete.
   TStatusEvent = reference to procedure(Sender: TObject; Progress: Single);
 
   TManagerProc = TProc<TPoolManager>;
-  {**
-   * Anonymous notify event, which is compatible with commonly used TNotifyEvent
-   *}
+
+  // Anonymous notify event, which is compatible with commonly used TNotifyEvent
   TAnonymousNotifyEvent = reference to procedure(Sender: TObject);
 
-  {**
-   * TPoolTask represent a dual data holder
-   *
-   * Derived task classes can add further input fields and also any output fields.
-   * But what are input and what are output fields?
-   * This is answered by your implementation of the correspondig TPoolWorker.
-   *}
+  // TPoolTask represent a dual data holder
+  //
+  // Derived task classes can add further input fields and also any output fields.
+  // But what are input and what are output fields?
+  // This is answered by your implementation of the correspondig TPoolWorker.
   TPoolTask = class(TObject)
   private
-    {**
-     * As long as the task is processed, the reference of the worker stays here
-     *
-     * This info is set and required only by the manager, don't access it from workers at all.
-     *}
+    // As long as the task is processed, the reference of the worker stays here
+    // This info is set and required only by the manager, don't access it from workers at all.
     FProcessingBy: TPoolWorker;
 
     function GetPriority: TTaskPriority;
@@ -138,22 +122,20 @@ type
     procedure Assign(Source: TPoolTask); virtual;
     function IsTheSame(Compare: TPoolTask):Boolean; virtual;
 
-    {**
-     * Both, Priority and PriorityRaw, sets the same field for the priority of the task
-     *
-     * The higher the priority the sooner it's taked for processing, if not all tasks
-     * can be processed at the same time.
-     *
-     * PriorityRaw is introduced for purposes, where you need a finer resolution (range of byte)
-     * Priority is comfortable, but allows only 7 common priorities through a enumeration
-     *
-     * Publish one of them in your derived task, if you need it.
-     *
-     * You must also enable the property SortTasks (disabled by default) in the corresponding
-     * derived manager.
-     *
-     * @see TPoolManager.SortTasks
-     *}
+    // Both, Priority and PriorityRaw, sets the same field for the priority of the task
+    //
+    // The higher the priority the sooner it's taked for processing, if not all tasks
+    // can be processed at the same time.
+    //
+    // PriorityRaw is introduced for purposes, where you need a finer resolution (range of byte)
+    // Priority is comfortable, but allows only 7 common priorities through a enumeration
+    //
+    // Publish one of them in your derived task, if you need it.
+    //
+    // You must also enable the property SortTasks (disabled by default) in the corresponding
+    // derived manager.
+    //
+    // See TPoolManager.SortTasks
     property Priority: TTaskPriority read GetPriority write SetPriority;
     property PriorityRaw: Byte read FPriority write FPriority;
   public
@@ -163,36 +145,31 @@ type
 
     property Owner: TObject read FOwner;
     property State: TTaskState read FState;
-    {**
-     * Generic event, which is fired, if the processing of the task is started
-     *}
+
+    // Generic event, which is fired, if the processing of the task is started
     property OnStart: TAnonymousNotifyEvent read FOnStart write FOnStart;
-    {**
-     * Generic event, which is fired, if the task is canceled
-     *}
+
+    // Generic event, which is fired, if the task is canceled
     property OnCancel: TAnonymousNotifyEvent read FOnCancel write FOnCancel;
-    {**
-     * Generic event, which is fired, if the task is done and was not canceled
-     *}
+
+    // Generic event, which is fired, if the task is done and was not canceled
     property OnDone: TAnonymousNotifyEvent read FOnDone write FOnDone;
   end;
 
   TThreadProcedures = class;
 
-  {**
-   * TPoolThread contains only the intersected structures/functionality of TPoolWorker and
-   * TPoolManager and act as the base class for them.
-   *
-   * The Execute method is full implemented and should be not overriden by descendants, instead
-   * a simple "Execution Loop" concept is introduced there:
-   * - InitializeExecutionLoop is executed once before the loop
-   * - ExecutionLoop is so long executed in loop as ExecutionLoopCondition returns True.
-   *   But each run of the loop requires a signal on MainSignal (see method TriggerMainSignal).
-   * - If ExecutionLoopCondition returns False, the loop will be breaked and FinalizeExecutionLoop
-   *   is called finally.
-   *
-   * Don't create any instances of this class!
-   *}
+  // TPoolThread contains only the intersected structures/functionality of TPoolWorker and
+  // TPoolManager and act as the base class for them.
+  //
+  // The Execute method is full implemented and should be not overriden by descendants, instead
+  // a simple "Execution Loop" concept is introduced there:
+  // - InitializeExecutionLoop is executed once before the loop
+  // - ExecutionLoop is so long executed in loop as ExecutionLoopCondition returns True.
+  //   But each run of the loop requires a signal on MainSignal (see method TriggerMainSignal).
+  // - If ExecutionLoopCondition returns False, the loop will be breaked and FinalizeExecutionLoop
+  //   is called finally.
+  //
+  // Don't create any instances of this class!
   TPoolThread = class(TThread)
   private
     FMainSignal: TEvent;
@@ -210,10 +187,9 @@ type
     procedure TriggerMainSignal;
 
     property MainSignal: TEvent read FMainSignal;
-    {**
-     * Says, whether this thread is currently in active execution. It's False, if it waits for
-     * the signal (MainSignal)
-     *}
+
+    // Says, whether this thread is currently in active execution. It's False, if it waits for
+    // the signal (MainSignal)
     property InExecutionLoop: Boolean read FInExecutionLoop;
   public
     constructor Create(CreateSuspended: Boolean);
@@ -221,22 +197,18 @@ type
 
     procedure Terminate; reintroduce; virtual;
 
-    {**
-     * Says, whether this thread is currently sleeping.
-     * It's True, if it waits for the signal (MainSignal).
-     *}
+    // Says, whether this thread is currently sleeping.
+    // It's True, if it waits for the signal (MainSignal).
     property Sleeping: Boolean read GetSleeping;
   end;
 
-  {**
-   * TPoolWorker is our workhorse and should do the work to complete a task
-   *
-   * This implementation contains all needed mechanisms for interacting with the corresponding
-   * TPoolManager.
-   *
-   * Of course, here are no code for doing the whole work. This must be implemented in
-   * ExecuteTask by the derived class.
-   *}
+  // TPoolWorker is our workhorse and should do the work to complete a task
+  //
+  // This implementation contains all needed mechanisms for interacting with the corresponding
+  // TPoolManager.
+  //
+  // Of course, here are no code for doing the whole work. This must be implemented in
+  // ExecuteTask by the derived class.
   TPoolWorker = class(TPoolThread)
   private
 {$IFDEF CODE_SITE}
@@ -257,20 +229,19 @@ type
     procedure FireEvent(FireEventProc: TProc<TPoolTask>; HasEventFunc: TTaskFunc);
 
     procedure InitializeTask(SameTasks: TTaskList);
-    {**
-     * ExecuteTask is the right place to implement the main work
-     *
-     * You have to use the property ContextTask for do the job.
-     *
-     * It's important to call the DoneTask method with a corresponding value in any case,
-     * if the task is done.
-     *
-     * As running condition they should check for the property Canceled, not for Terminated.
-     *
-     * For example:
-     * - On error: DoneTask(False);
-     * - On success: DoneTask(True);
-     *}
+
+    // ExecuteTask is the right place to implement the main work
+    //
+    // You have to use the property ContextTask for do the job.
+    //
+    // It's important to call the DoneTask method with a corresponding value in any case,
+    // if the task is done.
+    //
+    // As running condition they should check for the property Canceled, not for Terminated.
+    //
+    // For example:
+    // - On error: DoneTask(False);
+    // - On success: DoneTask(True);
     procedure ExecuteTask; virtual; abstract;
     procedure DoneTask(Successful: Boolean);
 
@@ -292,72 +263,68 @@ type
     property State: TWorkerState read FState write FState;
   end;
 
-  {**
-   * TPoolManager is the key class of the whole concept. It's almost full implemented.
-   * Derived managers must only implement the class method WorkerClass.
-   * For more comfort it's recommended to reintroduce the class method Singleton.
-   * Nothing more is needed, but you can introduce new methods for easier tasks handling.
-   *
-   * @see TPoolManager.WorkerClass
-   * @see TPoolManager.Singleton
-   *
-   * Singleton pattern
-   * -----------------
-   *
-   * Because it makes no sense, to hold any instances of the manager, the singleton pattern was
-   * choosed for rich features (e.g. Demand mode).
-   *
-   * To access the manager you should call always the class method Singleton on the derived
-   * manager class, which always return a valid instance of the corresponding class.
-   * On the first call it creates and starts the manager thread and you are instantly able,
-   * to add your tasks.
-   *
-   * Of course you are able to instantiate many instances manually, but this is not a part of
-   * concept and the behaviour isn't tested.
-   *
-   * @see TPoolManager.Singleton
-   *
-   * Concurrent workers
-   * ------------------
-   *
-   * Each manager is able to manage a amount of workers (TPoolWorker) for processing the added
-   * tasks. The workers are created only on demand. Each worker get's the next task from the
-   * task queue, after it has done their current one. If there are no further tasks in the queue,
-   * all sleeping workers are terminated automatically. But this behaviour is influenced by the
-   * property SpareWorkersCount.
-   *
-   * @see TPoolManager.ConcurrentWorkersCount
-   *
-   * Spared workers
-   * --------------
-   *
-   * You can define a amount of workers, which are not terminated automatically, unless you
-   * decrease the property SpareWorkersCount or terminate the manager manually. This is usefull
-   * for often small tasks.
-   *
-   * The "Demand mode" is disabled, if you define more than 0 SpareWorkersCount.
-   *
-   * @see TPoolManager.SpareWorkersCount
-   *
-   * Demand mode
-   * -----------
-   *
-   * By default a single instance/thread for each derived TPoolManager class is created by the
-   * first call of the class method Singleton and resist, until your application is closed or
-   * you manually terminate it.
-   *
-   * This bahavior can be changed, by simple passing an "init" procedure, before the first call
-   * of Singleton is done. If you do that, the manager terminates himself automatically, if all
-   * added tasks are done or get canceled. The property SpareWorkersCount must be zero (0),
-   * otherwise the demand mode can't be activated.
-   *
-   * @see TPoolManager.RegisterSingletonOnDemandProc
-   *}
+  // TPoolManager is the key class of the whole concept. It's almost full implemented.
+  // Derived managers must only implement the class method WorkerClass.
+  // For more comfort it's recommended to reintroduce the class method Singleton.
+  // Nothing more is needed, but you can introduce new methods for easier tasks handling.
+  //
+  // @see TPoolManager.WorkerClass
+  // @see TPoolManager.Singleton
+  //
+  // Singleton pattern
+  // -----------------
+  //
+  // Because it makes no sense, to hold any instances of the manager, the singleton pattern was
+  // choosed for rich features (e.g. Demand mode).
+  //
+  // To access the manager you should call always the class method Singleton on the derived
+  // manager class, which always return a valid instance of the corresponding class.
+  // On the first call it creates and starts the manager thread and you are instantly able,
+  // to add your tasks.
+  //
+  // Of course you are able to instantiate many instances manually, but this is not a part of
+  // concept and the behaviour isn't tested.
+  //
+  // @see TPoolManager.Singleton
+  //
+  // Concurrent workers
+  // ------------------
+  //
+  // Each manager is able to manage a amount of workers (TPoolWorker) for processing the added
+  // tasks. The workers are created only on demand. Each worker get's the next task from the
+  // task queue, after it has done their current one. If there are no further tasks in the queue,
+  // all sleeping workers are terminated automatically. But this behaviour is influenced by the
+  // property SpareWorkersCount.
+  //
+  // @see TPoolManager.ConcurrentWorkersCount
+  //
+  // Spared workers
+  // --------------
+  //
+  // You can define a amount of workers, which are not terminated automatically, unless you
+  // decrease the property SpareWorkersCount or terminate the manager manually. This is usefull
+  // for often small tasks.
+  //
+  // The "Demand mode" is disabled, if you define more than 0 SpareWorkersCount.
+  //
+  // @see TPoolManager.SpareWorkersCount
+  //
+  // Demand mode
+  // -----------
+  //
+  // By default a single instance/thread for each derived TPoolManager class is created by the
+  // first call of the class method Singleton and resist, until your application is closed or
+  // you manually terminate it.
+  //
+  // This bahavior can be changed, by simple passing an "init" procedure, before the first call
+  // of Singleton is done. If you do that, the manager terminates himself automatically, if all
+  // added tasks are done or get canceled. The property SpareWorkersCount must be zero (0),
+  // otherwise the demand mode can't be activated.
+  //
+  // See TPoolManager.RegisterSingletonOnDemandProc
   TPoolManager = class(TPoolThread)
   private
-    {**
-     * I dont't like to waste the global namespace with types, which are only locally required
-     *}
+    // Locally required types
     type
     TTaskComparer = TDelegatedComparer<TPoolTask>;
 
@@ -381,9 +348,8 @@ type
       ManagerClass: TPoolManagerClass;
       DemandProc: TManagerProc;
     end;
-  {**
-   * Private section for class related stuff
-   *}
+
+  // Private section for class related stuff
   private
     class var
     FSingleInstances: array of TPoolManager;
@@ -392,9 +358,8 @@ type
 
     class function GetDemandProcIndex(ReturnOnFreeIndex: Boolean = False):Integer;
     class function GetCPUCount: Integer;
-  {**
-   * Private section for object related stuff
-   *}
+
+  // Private section for object related stuff
   private
     FOwners: TOwnerList;
     FOwnersDoneList: TObjectList;
@@ -420,42 +385,38 @@ type
     function GetSortTasks: Boolean;
 
     property Owners: TOwnerList read FOwners;
-    {**
-     * @see TPoolManager.RegisterSingletonOnDemandProc
-     *}
+
+    // See TPoolManager.RegisterSingletonOnDemandProc
     property DemandMode: Boolean read FDemandMode;
-  {**
-   * Protected section for class related stuff
-   *}
+
+  //Protected section for class related stuff
   protected
 
     class destructor Destroy;
 
     class procedure SingletonTerminateGate(Sender: TObject);
-    {**
-     * WorkerClass should return the class of the corresponding TPoolWorker
-     *
-     * This is the one and only method, which you _must_ implement in any derived manager.
-     *
-     * Example:
-     * <code>
-     * TMyManager = class(TPoolManager)
-     * protected
-     *   class function WorkerClass: TPoolWorkerClass; override;
-     * end;
-     *
-     * implementation
-     *
-     * class function TMyManager.WorkerClass: TPoolWorkerClass;
-     * begin
-     *   Result := TMyWorker;
-     * end;
-     * </code>
-     *}
+
+    // WorkerClass should return the class of the corresponding TPoolWorker
+    //
+    // This is the one and only method, which you _must_ implement in any derived manager.
+    //
+    // Example:
+    // <code>
+    // TMyManager = class(TPoolManager)
+    // protected
+    //   class function WorkerClass: TPoolWorkerClass; override;
+    // end;
+    //
+    // implementation
+    //
+    // class function TMyManager.WorkerClass: TPoolWorkerClass;
+    // begin
+    //   Result := TMyWorker;
+    // end;
+    // </code>
     class function WorkerClass: TPoolWorkerClass; virtual; abstract;
-  {**
-   * Protected section for object related stuff
-   *}
+
+  // Protected section for object related stuff
   protected
     procedure BeginReadTasks;
     procedure EndReadTasks;
@@ -488,21 +449,19 @@ type
 
     property Workers: TWorkerList read FWorkers;
     property Tasks: TTaskList read FTasks;
-    {**
-     * Defines, whether the tasks should be sorted, before the next is picked for processing
-     *
-     * How the tasks are sorted, must be implemented in the class method TPoolTask.Compare.
-     * If you need such sorting mechanism, you must set this property to True in the
-     * derived constructor.
-     *
-     * @see TPoolTask.Compare
-     * @default False
-     *}
+
+    // Defines, whether the tasks should be sorted, before the next is picked for processing
+    //
+    // How the tasks are sorted, must be implemented in the class method TPoolTask.Compare.
+    // If you need such sorting mechanism, you must set this property to True in the
+    // derived constructor.
+    //
+    // See TPoolTask.Compare
+    // Default is False
     property SortTasks: Boolean read GetSortTasks write SetSortTasks;
     property ContextProcedures: TThreadProcedures read FContextProcedures;
-  {**
-   * Class related public section
-   *}
+
+  // Class related public section
   public
     class function Singleton: TPoolManager;
     class function HasSingleton: Boolean;
@@ -513,9 +472,8 @@ type
     class procedure UnregisterSingletonOnDemandProc;
 
     class procedure DispatchOwnerDestroyed(Owner: TObject);
-  {**
-   * Object related public section
-   *}
+
+  // Object related public section
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -536,41 +494,32 @@ type
       OnTasksComplete: TAnonymousNotifyEvent);
     function RestoreOwners: Boolean;
 
-    {**
-     * Defines, how many worker threads (derived from TPoolWorker) are at the same time allowed
-     *
-     * @default 8
-     *}
+    // Defines, how many worker threads (derived from TPoolWorker) are at the same time allowed
+    //
+    // Default is 8
     property ConcurrentWorkersCount: Integer read FConcurrentWorkersCount
       write SetConcurrentWorkersCount;
-    {**
-     * Defines, how many workers for each CPU are at the same time allowed
-     * This is a write only property. To determine, how many workers are indeed defined,
-     * see ConcurrentWorkersCount. If a value is lower than 1, 2 is assigned.
-     *
-     * @see TPoolManager.ConcurrentWorkersCount
-     *}
+
+    // Defines, how many workers for each CPU are at the same time allowed
+    // This is a write only property. To determine, how many workers are indeed defined,
+    // see ConcurrentWorkersCount. If a value is lower than 1, 2 is assigned.
     property ConcurrentWorkersCountPerCPU: Integer write SetConcurrentWorkersCountPerCPU;
-    {**
-     * Defines, how many worker threads should be spared
-     *
-     * The manager terminate workers, which are in the State wsReady.
-     * With this property you are able to define a amount of sleeping workers that are not
-     * terminated. This is useful for tasks which are done often, but their execution is fast.
-     * In such cases the creation of a new thread costs more CPU cycles than the Execute method.
-     *
-     * This value should be lower than or equal to ConcurrentWorkersCount.
-     *
-     * @default 0
-     *}
+
+    // Defines, how many worker threads should be spared
+    //
+    // The manager terminate workers, which are in the State wsReady.
+    // With this property you are able to define a amount of sleeping workers that are not
+    // terminated. This is useful for tasks which are done often, but their execution is fast.
+    // In such cases the creation of a new thread costs more CPU cycles than the Execute method.
+    //
+    // This value should be lower than or equal to ConcurrentWorkersCount.
+    //
+    // Default is 0
     property SpareWorkersCount: Integer read FSpareWorkersCount write SetSpareWorkersCount;
-    {**
-     * Defines, how many workers for each CPU should be spared
-     * This is a write only property. To determine, how many spared workers are indeed defined,
-     * see SpareWorkersCount. If a value is lower than 1, 2 is assigned.
-     *
-     * @see TPoolManager.SpareWorkersCount
-     *}
+
+    // Defines, how many workers for each CPU should be spared
+    // This is a write only property. To determine, how many spared workers are indeed defined,
+    // see SpareWorkersCount. If a value is lower than 1, 2 is assigned.
     property SpareWorkersCountPerCPU: Integer write SetSpareWorkersCountPerCPU;
   end;
 
@@ -600,7 +549,7 @@ type
 
 implementation
 
-{** TPoolTask **}
+{ TPoolTask }
 
 constructor TPoolTask.Create(Owner: TObject);
 begin
@@ -609,9 +558,6 @@ begin
   Priority := tpNormal;
 end;
 
-{**
- * Getter for the property Priority
- *}
 function TPoolTask.GetPriority: TTaskPriority;
 begin
   case FPriority of
@@ -634,12 +580,10 @@ begin
   end;
 end;
 
-{**
- * Determine, whether the passed task is the same as the current instance
- *
- * The manager checks every time, before they start a new task, whether there are other
- * "same" tasks in the queue and initialize the worker with a bunch at once.
- *}
+// Determine, whether the passed task is the same as the current instance
+//
+// The manager checks every time, before they start a new task, whether there are other
+// "same" tasks in the queue and initialize the worker with a bunch at once.
 function TPoolTask.IsTheSame(Compare: TPoolTask): Boolean;
 begin
   Result := False;
@@ -651,12 +595,10 @@ begin
   FPriority := Ord(Priority);
 end;
 
-{**
- * Assigns data from other task
- *
- * The Assign method should only assign events and fields, which are required for doing the task,
- * no results.
- *}
+// Assigns data from other task
+//
+// The Assign method should only assign events and fields, which are required for doing the task,
+// no results.
 procedure TPoolTask.Assign(Source: TPoolTask);
 begin
   PriorityRaw := Source.PriorityRaw;
@@ -665,30 +607,25 @@ begin
   OnCancel := Source.OnCancel;
 end;
 
-{**
- * Creates a new instance of the task
- *}
+// Clones a new instance of the task
 function TPoolTask.Clone: TPoolTask;
 begin
   Result := TPoolTaskClass(ClassType).Create(Owner);
   Result.Assign(Self);
 end;
 
-{**
- * Compares two tasks
- *
- * Compare is used for sorting the tasks. This method considers only the priority,
- * but can be overriden by a derived task.
- *
- * @see TPoolTask.Priority
- * @see TPoolManager.SortTasks
- *}
+// Compares two tasks
+//
+// Compare is used for sorting the tasks. This method considers only the priority,
+// but can be overriden by a derived task.
+//
+// See TPoolTask.Priority and TPoolManager.SortTasks
 class function TPoolTask.Compare(const Left, Right: TPoolTask):Integer;
 begin
   Result := Right.FPriority - Left.FPriority;
 end;
 
-{** TPoolThread **}
+{ TPoolThread }
 
 constructor TPoolThread.Create(CreateSuspended: Boolean);
 begin
@@ -726,9 +663,8 @@ begin
   else
     CodeSiteManager.SetCurrentThreadName(ClassName);
 {$ENDIF}
-  {**
-   * This is the whole secret of the "Execution Loop" concept
-   *}
+
+  // This is the whole secret of the "Execution Loop" concept
   ExecutionLoopInitialize;
   try
     while ExecutionLoopCondition do
@@ -761,7 +697,7 @@ begin
   TriggerMainSignal;
 end;
 
-{** TPoolWorker **}
+{ TPoolWorker }
 
 constructor TPoolWorker.Create(Owner: TPoolManager);
 begin
@@ -793,7 +729,6 @@ begin
   try
     if Assigned(ContextTask) and (State = wsBusy) then
     begin
-
       FireEvent(
         procedure(Task: TPoolTask)
         begin
@@ -879,21 +814,18 @@ begin
       Synchronize(SynchronizeProc);
   finally
     FireEventTasks.Free;
-    {**
-     * Prevent memory leaks
-     *}
+
+    // Prevent memory leaks
     FireEventProc := nil;
     HasEventFunc := nil;
     SynchronizeProc := nil;
   end;
 end;
 
-{**
- * Conditions:
- * - This method should be called only by manager and also only from their thread context
- * - The passed list should never be empty
- * - The tasks in the list must have as State = tsInWork
- *}
+// Conditions:
+// - This method should be called only by manager and also only from their thread context
+// - The passed list should never be empty
+// - The tasks in the list must have as State = tsInWork
 procedure TPoolWorker.InitializeTask(SameTasks: TTaskList);
 begin
   if Assigned(FContextTask) then
@@ -904,9 +836,8 @@ begin
     FProcessTasks.AddRange(SameTasks)
   else
     FProcessTasks.Add(SameTasks[0]);
-  {**
-   * The context task is always a clone of the first task
-   *}
+
+  // The context task is always a clone of the first task
   FContextTask := SameTasks[0].Clone;
   ContextTask.FOwner := Self;
 
@@ -915,12 +846,10 @@ begin
   TriggerMainSignal;
 end;
 
-{**
- * This method must be called after the processing of a task was done, indifferent, whether it was
- * canceled or not, it must always called !
- *
- * @see TPoolWorker.ExecuteTask
- *}
+// This method must be called after the processing of a task was done, indifferent, whether it was
+// canceled or not, it must always called!
+//
+// See TPoolWorker.ExecuteTask
 procedure TPoolWorker.DoneTask(Successful: Boolean);
 var
   DoneState: TWorkerState;
@@ -956,9 +885,8 @@ begin
     CodeSite.SendWarning('Canceled');
 {$ENDIF}
   end;
-  {**
-   * Signal the manager, that we have done our task
-   *}
+
+  // Signal the manager, that we have done our task
   Owner.WorkerTaskDone(Self, DoneState);
 {$IFDEF CSW_DONE_TASK}
   CodeSite.ExitMethod(Self, 'DoneTask');
@@ -977,7 +905,7 @@ begin
     FCanceled := True;
 end;
 
-{** TPoolManager **}
+{ TPoolManager }
 
 class destructor TPoolManager.Destroy;
 var
@@ -1003,9 +931,7 @@ end;
 
 constructor TPoolManager.Create;
 begin
-  {**
-   * The manager should start immediately (Suspended = False)
-   *}
+  // The manager should start immediately (Suspended = False)
   inherited Create(False);
 
   FWorkers := TWorkerList.Create(False);
@@ -1040,21 +966,19 @@ begin
   FOwnersDoneList.Add(Owner);
 end;
 
-{**
- * Adds a task to the manager
- *
- * The passed task is fully managed by the TPoolManager and should not be freed externally.
- *
- * Conditions for the execution of the passed task:
- * - If there are no workers yet and the property ConcurrentWorker is greater than zero, the first
- *   worker thread will be created, receive this task and begin the work
- * - If there is a sleeping worker thread (State = wsReady), it receive this task immediately and
- *   begin the work
- * - If the count of working workers (TPoolWorker.State = wsBusy) is lower than the property
- *   ConcurrentWorkersCount, then a new worker thread will be created, receive this task and
- *   begin the work
- * - Otherwise, this task waiting for processing, until one of the above condition are be true
- *}
+// Adds a task to the manager
+//
+// The passed task is fully managed by the TPoolManager and should not be freed externally.
+//
+// Conditions for the execution of the passed task:
+// - If there are no workers yet and the property ConcurrentWorker is greater than zero, the first
+//   worker thread will be created, receive this task and begin the work
+// - If there is a sleeping worker thread (State = wsReady), it receive this task immediately and
+//   begin the work
+// - If the count of working workers (TPoolWorker.State = wsBusy) is lower than the property
+//   ConcurrentWorkersCount, then a new worker thread will be created, receive this task and
+//   begin the work
+// - Otherwise, this task waiting for processing, until one of the above condition are be true
 procedure TPoolManager.AddTask(Task: TPoolTask);
 begin
   ContextProcedures.Add(
@@ -1081,11 +1005,9 @@ begin
   Result := FTasksLock.BeginWrite;
 end;
 
-{**
- * Customizable cancel method for tasks, through the ability for passing a anonymous compare method
- *
- * @param CompareFunction Each task on which this method answers with True, will be canceled
- *}
+// Customizable cancel method for tasks, through the ability for passing a anonymous compare method
+//
+// CompareFunction - Each task on which this method answers with True, will be canceled
 procedure TPoolManager.CustomTaskCancel(CompareFunction: TTaskFunc);
 var
   CanceledTasks: TTaskList;
@@ -1100,32 +1022,25 @@ begin
       begin
         if Assigned(Tasks[TaskIndex]) and CompareFunction(Tasks[TaskIndex]) then
         begin
-          {**
-           * Try to find the connected worker, if the task is in work
-           *}
+          // Try to find the connected worker, if the task is in work
           if (Tasks[TaskIndex].State = tsInWork) and
             Assigned(Tasks[TaskIndex].FProcessingBy) then
             WorkerIndex := Workers.IndexOf(Tasks[TaskIndex].FProcessingBy)
           else
             WorkerIndex:=-1;
-          {**
-           * Memorize this cancel operation for owner based stats
-           *}
+
+          // Memorize this cancel operation for owner based stats
           AddOwnerDone(Tasks[TaskIndex].Owner);
-          {**
-           * If the task has a cancel event handler, so extract it from the tasks list...
-           * (the task is destroyed later, after all OnCancel events were fired)
-           *}
+
+          // If the task has a cancel event handler, so extract it from the tasks list...
+          // (the task is destroyed later, after all OnCancel events were fired)
           if Assigned(Tasks[TaskIndex].OnCancel) then
             CanceledTasks.Add(Tasks.Extract(Tasks[TaskIndex])) // Mnemonic: Extract removes without freeing, although it is owner of it
-          {**
-           * ...otherwise simply delete it (it will be freed too)
-           *}
+          // ...otherwise simply delete it (it will be freed too)
           else
             Tasks.Delete(TaskIndex);
-          {**
-           * Perform a cancel operation on the worker, if one was detected previously
-           *}
+
+          // Perform a cancel operation on the worker, if one was detected previously
           if (WorkerIndex >= 0) and
             not Workers[WorkerIndex].Canceled and
             (Workers[WorkerIndex].State = wsBusy) then
@@ -1138,9 +1053,7 @@ begin
       EndWriteTasks;
     end;
   finally
-    {**
-     * Fire the OnCancel event in batch for all canceled tasks
-     *}
+    // Fire the OnCancel event in batch for all canceled tasks
     if CanceledTasks.Count > 0 then
     begin
       Queue(
@@ -1194,11 +1107,9 @@ begin
   end;
 end;
 
-{**
- * Cancels all tasks, which are the "same" to the passed task
- *
- * @see TPoolTask.IsTheSame
- *}
+// Cancels all tasks, which are the "same" to the passed task
+//
+// See TPoolTask.IsTheSame
 procedure TPoolManager.CancelTasksBySame(Task: TPoolTask);
 begin
   ContextProcedures.Add(
@@ -1221,11 +1132,9 @@ begin
     end);
 end;
 
-{**
- * Cancels all tasks, which have the passed Owner
- *
- * @see TPoolTask.Owner
- *}
+// Cancels all tasks, which have the passed Owner
+//
+// See TPoolTask.Owner
 procedure TPoolManager.CancelTasksByOwner(Owner: TObject);
 begin
   ContextProcedures.Add(
@@ -1249,9 +1158,7 @@ begin
   FTasksLock.EndWrite;
 end;
 
-{**
- * Updates the internal owner based statistics
- *}
+// Updates the internal owner based statistics
 procedure TPoolManager.OwnerAddTasksCount(Owner: TObject; AddTotalCount, AddDoneCount: Integer;
   FireEvents: Boolean);
 var
@@ -1268,9 +1175,7 @@ begin
   if AddDoneCount <> 0 then
     OriginOwnerEntry.TasksDoneCount := OriginOwnerEntry.TasksDoneCount + AddDoneCount;
 
-  {**
-   * Local clone for the OwnerEntry
-   *}
+  // Local clone for the OwnerEntry
   OwnerEntry := TOwner.Create;
   OwnerEntry.Owner := Owner;
   OwnerEntry.TasksDoneCount := OriginOwnerEntry.TasksDoneCount;
@@ -1318,19 +1223,17 @@ begin
     OwnerEntry.Free;
 end;
 
-{**
- * Registers any TObject instance as owner and connect it with some events
- *
- * Because each TPoolTask can have a owner, internally owner based statistics are led, so
- * you can, for example, easily implement a progress bar.
- *
- * For best practise, the passed event handlers should be methods of the passed owner object.
- *
- * The registered owner can simple unregistered on all singleton instances by
- * DispatchOwnerDestroyed.
- *
- * @see TPoolManager.DispatchOwnerDestroyed
- *}
+// Registers any TObject instance as owner and connect it with some events
+//
+// Because each TPoolTask can have a owner, internally owner based statistics are led, so
+// you can, for example, easily implement a progress bar.
+//
+// For best practise, the passed event handlers should be methods of the passed owner object.
+//
+// The registered owner can simple unregistered on all singleton instances by
+// DispatchOwnerDestroyed.
+//
+// See TPoolManager.DispatchOwnerDestroyed
 procedure TPoolManager.RegisterOwner(Owner: TObject; OnTasksStatus: TStatusEvent;
   OnTasksComplete: TAnonymousNotifyEvent);
 begin
@@ -1363,9 +1266,6 @@ begin
   Result:=-1;
 end;
 
-{**
- * Getter for the property SortTasks
- *}
 function TPoolManager.GetSortTasks: Boolean;
 begin
   Result := Assigned(FComparer);
@@ -1376,11 +1276,9 @@ begin
   Result := ProcessorCount;
 end;
 
-{**
- * Notice...
- * - that this method has no locks!
- * - when AutoAdd is True (default), so you must obtain a write lock before
- *}
+// Notice...
+// - that this method has no locks!
+// - when AutoAdd is True (default), so you must obtain a write lock before
 function TPoolManager.GetOwner(Owner: TObject; AutoAdd: Boolean):TOwner;
 var
   Index: Integer;
@@ -1403,14 +1301,12 @@ begin
     Result := Owners[Index]
 end;
 
-{**
- * Creates a new unmanaged worker
- *
- * Don't call it directly. This method is called by GetReadyWorker automatically on demand.
- * With this you are able to customize the inited worker in any derived manager.
- *
- * @see TPoolManager.GetReadyWorker
- *}
+// Creates a new unmanaged worker
+//
+// Don't call it directly. This method is called by GetReadyWorker automatically on demand.
+// With this you are able to customize the inited worker in any derived manager.
+//
+// See TPoolManager.GetReadyWorker
 function TPoolManager.CreateWorker: TPoolWorker;
 begin
   Result := WorkerClass.Create(Self);
@@ -1441,11 +1337,9 @@ var
     Result := FDynamicTerminateEnabled and (SpareWorkersCount = 0) and not HasTasks;
   end;
 
-  {**
-   * Executes the context procedures
-   *
-   * @see TPoolManager.AddContextProcedure
-   *}
+  // Executes the context procedures
+  //
+  // See TPoolManager.AddContextProcedure
   procedure CheckContextProcedures;
 {$IFDEF CSM_CHECK_CONTEXT_PROCEDURES}
   var
@@ -1461,42 +1355,34 @@ var
 {$ENDIF}
   end;
 
-  {**
-   * Check, whether there are further tasks for processing and try to assign it to a new or
-   * sleeping worker
-   *
-   * @return True, if there are further outstanding tasks
-   *}
+  // Check, whether there are further tasks for processing and try to assign it to a new or
+  // sleeping worker
   procedure CheckOutstandigTasks;
   var
     TaskIndex: Integer;
     SameTasks: TTaskList;
     Worker: TPoolWorker;
 
-    {**
-     * Says, whether there are sleeping workers or the defined boundig (ConcurrentWorkersCount)
-     * allows it to create a new worker
-     *
-     * It's just a try to determine this and you should don't surely rely on the answer,
-     * because the lock on Workers is acquired and released again. So there are possible
-     * situations, that this method return True and the next call on GetReadyWorker
-     * delivers nil. But you can use it as a condition to enters a complex code section,
-     * as long you check the result of GetReadyWorker against nil.
-     *}
+    // Says, whether there are sleeping workers or the defined boundig (ConcurrentWorkersCount)
+    // allows it to create a new worker
+    //
+    // It's just a try to determine this and you should don't surely rely on the answer,
+    // because the lock on Workers is acquired and released again. So there are possible
+    // situations, that this method return True and the next call on GetReadyWorker
+    // delivers nil. But you can use it as a condition to enters a complex code section,
+    // as long you check the result of GetReadyWorker against nil.
     function HasReadyWorkers: Boolean;
     var
       cc, WorkersCount: Integer;
     begin
       WorkersCount := Workers.Count;
-      {**
-       * First (fast) try: Check the bounding
-       *}
+
+      // First (fast) try: Check the boundings
       Result := WorkersCount < ConcurrentWorkersCount;
       if Result then
         Exit;
-      {**
-       * Second (slow) try: Search for a sleeping worker
-       *}
+
+      // Second (slow) try: Search for a sleeping worker
       Result := True;
       for cc := 0 to WorkersCount - 1 do
         if not Workers[cc].Terminated and (Workers[cc].State = wsReady) then
@@ -1504,27 +1390,23 @@ var
       Result := False;
     end;
 
-    {**
-     * Returns a "ready" worker thread
-     *
-     * If there are sleeping worker threads, so one of them will be returned.
-     * If no sleeping threads are available and the bounding (ConcurrentWorkersCount)
-     * is not exceeded, a new worker thread will be created and returned.
-     * Otherwise nil will be returned and must be handled properly.
-     *
-     * New workers will be created, if needed and possible, by the method CreateWorker.
-     *
-     * @see TPoolManager.ConcurrentWorkersCount
-     * @see TPoolManager.CreateWorker
-     *}
+    // Returns a "ready" worker thread
+    //
+    // If there are sleeping worker threads, so one of them will be returned.
+    // If no sleeping threads are available and the bounding (ConcurrentWorkersCount)
+    // is not exceeded, a new worker thread will be created and returned.
+    // Otherwise nil will be returned and must be handled properly.
+    //
+    // New workers will be created, if needed and possible, by the method CreateWorker.
+    //
+    // See TPoolManager.ConcurrentWorkersCount and TPoolManager.CreateWorker
     function GetReadyWorker: TPoolWorker;
     var
       cc, WorkersCount: Integer;
     begin
       Result := nil;
-      {**
-       * Search for a sleeping worker
-       *}
+
+      // Search for a sleeping worker
       WorkersCount := Workers.Count;
       if WorkersCount > ConcurrentWorkersCount then
         Exit;
@@ -1536,9 +1418,8 @@ var
         else
           Result := nil;
       end;
-      {**
-       * No sleeping worker found, try to create a new one
-       *}
+
+      // No sleeping worker found, try to create a new one
       if not Assigned(Result) and (WorkersCount < ConcurrentWorkersCount) then
       begin
         Result := CreateWorker;
@@ -1660,10 +1541,8 @@ var
     FOwnersDoneList.Clear;
   end;
 
-  {**
-   * Terminates workers which are sleeping (State = wsReady) with the property
-   * SpareWorkersCount in mind.
-   *}
+  // Terminates workers which are sleeping (State = wsReady) with the property
+  // SpareWorkersCount in mind.
   procedure TerminateSleepingWorkers;
   var
     SleepingWorkerIndex: Integer;
@@ -1709,17 +1588,15 @@ begin
 {$IFDEF CSM_EXECUTION_LOOP}
   CodeSite.EnterMethod(Self, 'ExecutionLoop');
 {$ENDIF}
-  {**
-   * Store the boundings for the count of workers, to prevent any side effects for this loop
-   *}
+
+  // Store the boundings for the count of workers, to prevent any side effects for this loop
   ConcurrentWorkersCount := Self.ConcurrentWorkersCount;
   SpareWorkersCount := Self.SpareWorkersCount;
 
   CheckContextProcedures;
-  {**
-   * Context procedures are able to terminate this thread, but in that case further
-   * processing must be prevented.
-   *}
+
+  // Context procedures are able to terminate this thread, but in that case further
+  // processing must be prevented.
   if not Terminated then
   begin
     CheckOutstandigTasks;
@@ -1738,9 +1615,7 @@ end;
 
 function TPoolManager.ExecutionLoopCondition: Boolean;
 begin
-  {**
-   * Manager is so long active as any workers exists
-   *}
+  // Manager is as long active as any workers exists
   Result := not Terminated or (Workers.Count > 0);
 end;
 
@@ -1749,9 +1624,8 @@ begin
 {$IFDEF CSM_EXECUTION_LOOP_FINALIZE}
   CodeSite.EnterMethod(Self, 'FinalizeExecutionLoop');
 {$ENDIF}
-  {**
-   * Exit the thread only, if there are no (write) locks
-   *}
+
+  // Exit the thread only, if there are no (write) locks
   BeginReadTasks;
   EndReadTasks;
 
@@ -1761,14 +1635,12 @@ begin
 {$ENDIF}
 end;
 
-{**
- * Notify all singleton instances, that the passed owner was be destroyed
- *
- * - You can call this method on the TPoolManager class or on any derived class.
- * - This method is blocking, but you are sure, that all managers were notified about the object
- *   destroy.
- * - This method should only be called from the main thread.
- *}
+// Notify all singleton instances, that the passed owner was destroyed
+//
+// - You can call this method on the TPoolManager class or on any derived class.
+// - This method is blocking, but you are sure, that all managers were notified about the object
+//   destroy.
+// - This method should only be called from the main thread.
 class procedure TPoolManager.DispatchOwnerDestroyed(Owner: TObject);
 var
   cc, ccc: Integer;
@@ -1782,12 +1654,11 @@ var
         try
           PoolManager.UnregisterOwner(Owner);
           PoolManager.CancelTasksByOwner(Owner);
-          {**
-           * Because UnregisterOwner and CancelTasksByOwner adds itself to
-           * ContextProcedures, we must manually execute it, but we are always on the
-           * right place:
-           * In the beginning of the ExecutionLoop inside the manager thread ;)
-           *}
+
+          // Because UnregisterOwner and CancelTasksByOwner adds itself to
+          // ContextProcedures, we must manually execute it, but we are always on the
+          // right place:
+          // In the beginning of the ExecutionLoop inside the manager thread ;)
           PoolManager.ContextProcedures.Execute;
         finally
           TInterlocked.Increment(CommitsProcessed);
@@ -1803,22 +1674,19 @@ begin
 
   CommitsProcessed := 0;
   CommitsTotal := 0;
-  {**
-   * Notify all singleton instances
-   *}
+
+  // Notify all singleton instances
   for cc := 0 to Length(FSingleInstances) - 1 do
     if Assigned(FSingleInstances[cc]) and not FSingleInstances[cc].Terminated then
       ManagerCommit(FSingleInstances[cc]);
-  {**
-   * Wait for all commits, if any
-   *}
+
+  // Wait for all commits, if any
   if CommitsTotal > 0 then
     repeat
       CheckSynchronize(50);
     until CommitsProcessed = CommitsTotal;
-  {**
-   * Remove the destroyed owner from all stored owners
-   *}
+
+  // Remove the destroyed owner from all stored owners
   for cc := 0 to Length(FStoredOwners) - 1 do
   begin
     if Assigned(FStoredOwners[cc]) and Assigned(FStoredOwners[cc].Owners) then
@@ -1835,18 +1703,12 @@ begin
   end;
 end;
 
-{**
- * Setter for the property ConcurrentWorkersCount
- *}
 procedure TPoolManager.SetConcurrentWorkersCount(ConcurrentWorkersCount: Integer);
 begin
   if TInterlocked.Exchange(FConcurrentWorkersCount, ConcurrentWorkersCount) <> ConcurrentWorkersCount then
     TriggerMainSignal;
 end;
 
-{**
- * Setter for the property ConcurrentWorkersCountPerCPU
- *}
 procedure TPoolManager.SetConcurrentWorkersCountPerCPU(ConcurrentWorkersCountPerCPU: Integer);
 var
   PerCPUCount: Integer;
@@ -1857,9 +1719,6 @@ begin
   ConcurrentWorkersCount := PerCPUCount;
 end;
 
-{**
- * Setter for the property SortTasks
- *}
 procedure TPoolManager.SetSortTasks(SortTasks: Boolean);
 begin
   if SortTasks = Self.SortTasks then
@@ -1875,18 +1734,12 @@ begin
       end);
 end;
 
-{**
- * Setter for the property SpareWorkersCount
- *}
 procedure TPoolManager.SetSpareWorkersCount(SpareWorkersCount: Integer);
 begin
   if TInterlocked.Exchange(FSpareWorkersCount, SpareWorkersCount) <> SpareWorkersCount then
     TriggerMainSignal;
 end;
 
-{**
- * Setter for the property SpareWorkersCountPerCPU
- *}
 procedure TPoolManager.SetSpareWorkersCountPerCPU(SpareWorkersCountPerCPU: Integer);
 var
   PerCPUCount: Integer;
@@ -1897,30 +1750,28 @@ begin
   SpareWorkersCount := PerCPUCount;
 end;
 
-{**
- * "Generic" singleton method
- *
- * It creates for each derived TPoolManager class, a single instance. For strong type access you can
- * reintroduce a new Singleton method, but obtain the instance form this one. The advantage of this
- * solution is, that you don't need to declare a new class field for the single instance in each
- * derived class.
- *
- * Derived TPoolManager's can use this Singleton concept as follows:
- *
- * <code>
- * TDerivedManager = class(TPoolManager)
- * public
- *   class function Singleton: TDerivedManager; reintroduce;
- * end;
- *
- * implementation
- *
- * class function TDerivedManager.Singleton: TDerivedManager;
- * begin
- *   Result := TDerivedManager(inherited Singleton); // Don't worried about this hard type cast ;) see the implementation
- * end;
- * </code>
- *}
+// "Generic" singleton method
+//
+// It creates for each derived TPoolManager class, a single instance. For strong type access you can
+// reintroduce a new Singleton method, but obtain the instance form this one. The advantage of this
+// solution is, that you don't need to declare a new class field for the single instance in each
+// derived class.
+//
+// Derived TPoolManager's can use this Singleton concept as follows:
+//
+// <code>
+// TDerivedManager = class(TPoolManager)
+// public
+//   class function Singleton: TDerivedManager; reintroduce;
+// end;
+//
+// implementation
+//
+// class function TDerivedManager.Singleton: TDerivedManager;
+// begin
+//   Result := TDerivedManager(inherited Singleton); // Don't worried about this hard type cast ;) see the implementation
+// end;
+// </code>
 class function TPoolManager.Singleton: TPoolManager;
 const
   GrowLength = 4;
@@ -1938,42 +1789,35 @@ begin
       Result := FSingleInstances[Index];
       Exit;
     end;
-  {**
-   * No single instance exists for the current class, so we have to create a new one
-   *}
+
+  // No single instance exists for the current class, so we have to create a new one
   Result := Self.Create;
   Result.OnTerminate := SingletonTerminateGate;
-  {**
-   * Lookup for a demand "init" proc
-   *}
+
+  // Lookup for a demand "init" proc
   DemandProcIndex := GetDemandProcIndex;
   if DemandProcIndex >= 0 then
   begin
     Result.FDemandMode := True;
     FDemandProcs[DemandProcIndex].DemandProc(Result);
   end;
-  {**
-   * Try to find a free position in array
-   *}
+
+  // Try to find a free position in array
   Index := 0;
   while (Index < ArrayLength) and Assigned(FSingleInstances[Index]) do
     Inc(Index);
-  {**
-   * Enlarge the array
-   *}
+
+  // Enlarge the array
   if Index = ArrayLength then
     SetLength(FSingleInstances, Index + GrowLength);
-  {**
-   * Store the instance in our class field
-   *}
-  FSingleInstances[Index]:=Result;
+
+  // Store the instance in our class field
+  FSingleInstances[Index] := Result;
 end;
 
-{**
- * Determines, whether there is already a single instance available for the current class
- *
- * @see TPoolManager.Singleton
- *}
+// Determines, whether there is already a single instance available for the current class
+//
+// See TPoolManager.Singleton
 class function TPoolManager.HasSingleton: Boolean;
 var
   Index: Integer;
@@ -2011,118 +1855,99 @@ begin
   end;
   if not Assigned(FDemandProcs[Index]) then
   begin
-    FDemandProcs[Index]:=TDemandProcAssign.Create;
+    FDemandProcs[Index] := TDemandProcAssign.Create;
     FDemandProcs[Index].ManagerClass := Self;
   end;
   FDemandProcs[Index].DemandProc := DemandProc;
 end;
 
-{**
- * Stores all registered owners
- *
- * It's executed in SingletonTerminateGate, if this instance is in "Demand Mode".
- * This method must be called from the main thread.
- *
- * @see TPoolManager.SingletonTerminateGate
- *}
+// Stores all registered owners
+//
+// It's executed in SingletonTerminateGate, if this instance is in "Demand Mode".
+// This method must be called from the main thread.
+//
+// See TPoolManager.SingletonTerminateGate
 procedure TPoolManager.StoreOwners;
 var
   Index, ArrLength, cc: Integer;
   Store: TOwnersAssign;
 begin
-  {**
-   * We need no locks, because this method should always be called from the main thread
-   *}
+  // We need no locks, because this method should always be called from the main thread
   Index := 0;
   ArrLength := Length(FStoredOwners);
-  {**
-   * Try to find the correct class position
-   *}
+
+  // Try to find the correct class position
   while (Index < ArrLength) and
     not (Assigned(FStoredOwners[Index]) and (FStoredOwners[Index].ManagerClass = ClassType)) do
     Inc(Index);
-  {**
-   * Create entry and grow the array, if not found
-   *}
+
+  // Create entry and grow the array, if not found
   if Index = ArrLength then
   begin
     Store := TOwnersAssign.Create;
     Store.ManagerClass := TPoolManagerClass(ClassType);
     Index := ArrLength;
     SetLength(FStoredOwners, ArrLength + 1);
-    FStoredOwners[Index]:=Store;
+    FStoredOwners[Index] := Store;
   end
-  {**
-   * Entry found
-   *}
+  // Entry found
   else
     Store := FStoredOwners[Index];
 
   if Assigned(Store.Owners) then
     FreeAndNil(Store.Owners);
-  {**
-   * Remove owners, for which are no events registered and reset the stats
-   *}
+
+  // Remove owners, for which are no events registered and reset the stats
   for cc := Owners.Count - 1 downto 0 do
   begin
     if not (Assigned(Owners[cc].OnTasksStatus) or Assigned(Owners[cc].OnTasksComplete)) then
       Owners.Delete(cc)
-    {**
-     * Reset stats for owners which are applied
-     *}
+    // Reset stats for owners which are applied
     else
     begin
       Owners[cc].TasksDoneCount := 0;
       Owners[cc].TasksTotalCount := 0;
     end;
   end;
-  {**
-   * Steal the Owners list
-   *}
+
+  // Steal the Owners list
   if Owners.Count > 0 then
     Store.Owners := Owners;
-  {**
-   * There are no further access's on this list, except the Free call in Destroy
-   *}
+
+  // There are no further access's on this list, except the Free call in Destroy
   FOwners := nil;
 end;
 
-{**
- * Restores all previously registered owners
- *
- * This method should only called in a demand init proc (RegisterSingeltonOnDemandProc).
- * It must called from the main thread, else you running into a crazy access violations loop.
- *
- * Here is a usage example of this method in a demand init proc:
- *
- * <code>
- * procedure PoolInit(Manager: TPoolManager);
- * begin
- *   Manager.ConcurrentWorkersCount := 16;
- *   if not Manager.RestoreOwners then
- *     Manager.RegisterOwner(Form1, Form1.TasksStatus, Form1.TaskDone);
- * end;
- *
- * TDerivedManager.RegisterSingletonOnDemandProc(PoolInit);
- * </code>
- *
- * @see TPoolManager.RegisterSingletonOnDemandProc
- * @see TPoolManager.RegisterOwner
- *
- * @return True, if there was previously any owners stored, otherwise False is returned.
- *}
+// Restores all previously registered owners
+//
+// This method should only called in a demand init proc (RegisterSingeltonOnDemandProc).
+// It must called from the main thread, else you running into a crazy access violations loop.
+//
+// Here is a usage example of this method in a demand init proc:
+//
+// <code>
+// procedure PoolInit(Manager: TPoolManager);
+// begin
+//   Manager.ConcurrentWorkersCount := 16;
+//   if not Manager.RestoreOwners then
+//     Manager.RegisterOwner(Form1, Form1.TasksStatus, Form1.TaskDone);
+// end;
+//
+// TDerivedManager.RegisterSingletonOnDemandProc(PoolInit);
+// </code>
+//
+// See TPoolManager.RegisterSingletonOnDemandProc and TPoolManager.RegisterOwner
+//
+// Returns True, if there was previously any owners stored, otherwise False is returned.
 function TPoolManager.RestoreOwners: Boolean;
 var
   Index, ArrLength: Integer;
 begin
-  {**
-   * We need no locks, because this method should always be called from the main thread
-   *}
+  // We need no locks, because this method should always be called from the main thread
   Index := 0;
   ArrLength := Length(FStoredOwners);
-  {**
-   * Try to find the correct class position
-   *}
+
+  // Try to find the correct class position
   while (Index < ArrLength) and
     not (Assigned(FStoredOwners[Index]) and (FStoredOwners[Index].ManagerClass = ClassType)) do
     Inc(Index);
@@ -2130,9 +1955,8 @@ begin
   Result:=(Index < ArrLength) and Assigned(FStoredOwners[Index].Owners);
   if not Result then
     Exit;
-  {**
-   * Reassign the Owners list
-   *}
+
+  // Reassign the Owners list
   Owners.Free;
   FOwners := FStoredOwners[Index].Owners;
   FStoredOwners[Index].Owners := nil;
@@ -2154,19 +1978,15 @@ begin
     FreeAndNil(FDemandProcs[Index]);
 end;
 
-{**
- * Determines, with the implementation of TPoolTask.IsTheSame, whether the task exists
- *
- * This method can be called from any thread, because it do a read lock on the task list.
- *}
+// Determines, with the implementation of TPoolTask.IsTheSame, whether the task exists
+//
+// This method can be called from any thread, because it do a read lock on the task list.
 function TPoolManager.TaskExists(Task: TPoolTask):Boolean;
 begin
   Result := CustomTaskExists(Task.IsTheSame);
 end;
 
-{**
- * Return the count of tasks, which have the same passed owner
- *}
+// Return the count of tasks, which have the same passed owner
 function TPoolManager.TasksCountByOwner(Owner: TObject):Integer;
 begin
   Result := CustomTaskCounter(
@@ -2183,9 +2003,8 @@ begin
     var
       cc: Integer;
     begin
-      {**
-       * Terminate all running workers
-       *}
+
+      // Terminate all running workers
       for cc := 0 to Workers.Count - 1 do
         Workers[cc].Terminate;
 
@@ -2193,14 +2012,12 @@ begin
     end);
 end;
 
-{**
- * Terminates all singleton instances of the managers and his workers in one step
- *
- * This is useful on application exit. In this case the Wait parameter must be True, because
- * otherwise all threads are hard killed.
- *
- * This method must called from the context of the main thread.
- *}
+// Terminates all singleton instances of the managers and his workers in one step
+//
+// This is useful on application exit. In this case the Wait parameter must be True, because
+// otherwise all threads are hard killed.
+//
+// This method must called from the context of the main thread.
 class procedure TPoolManager.TerminateSingletonInstances(Wait: Boolean);
 var
   cc, SingleInstancesLength: Integer;
@@ -2225,24 +2042,20 @@ begin
   until cc = SingleInstancesLength;
 end;
 
-{**
- * Event handler for TPoolManager.OnTerminate (just for singleton instances)
- *
- * Notice: It's always called from the context of the main thread.
- *}
+// Event handler for TPoolManager.OnTerminate (just for singleton instances)
+//
+// Notice: It's always called from the context of the main thread.
 class procedure TPoolManager.SingletonTerminateGate(Sender: TObject);
 var
   cc: Integer;
 begin
-  {**
-   * Remove the connection from FSingleInstances, if one is there
-   *}
+  // Remove the connection from FSingleInstances, if one is there
   for cc := 0 to Length(FSingleInstances) - 1 do
     if FSingleInstances[cc] = Sender then
     begin
       if FSingleInstances[cc].DemandMode then
         FSingleInstances[cc].StoreOwners;
-      FSingleInstances[cc]:=nil;
+      FSingleInstances[cc] := nil;
       Break;
     end;
 end;
@@ -2256,11 +2069,9 @@ begin
     end);
 end;
 
-{**
- * Callback method for TPoolWorker's, which has done their task
- *
- * It's called in TPoolWorker.DoneTask from their thread context
- *}
+// Callback method for TPoolWorker's, which has done their task
+//
+// It's called in TPoolWorker.DoneTask from their thread context
 procedure TPoolManager.WorkerTaskDone(DoneWorker: TPoolWorker; WorkerState: TWorkerState);
 var
   BlockSignal: TEvent;
@@ -2278,9 +2089,7 @@ begin
 
           BeginWriteTasks;
           try
-            {**
-             * Remove the processed tasks from tasks
-             *}
+            // Remove the processed tasks from tasks
             for ProcessedTaskIndex := 0 to DoneWorker.ProcessTasks.Count - 1 do
             begin
               TaskIndex := Tasks.IndexOf(
@@ -2305,11 +2114,9 @@ begin
   end;
 end;
 
-{**
- * Callback method for TPoolWorker's, which are terminated
- *
- * It's called in TPoolWorker.ExecutionLoopFinalize automatically.
- *}
+// Callback method for TPoolWorker's, which are terminated
+//
+// It's called in TPoolWorker.ExecutionLoopFinalize automatically.
 procedure TPoolManager.WorkerTerminated(TerminatedWorker: TPoolWorker);
 var
   BlockSignal: TEvent;
@@ -2331,7 +2138,7 @@ begin
   end;
 end;
 
-{** TThreadProcedures **}
+{ TThreadProcedures }
 
 constructor TThreadProcedures.Create(ForeignChangedSignal: TEvent);
 begin
@@ -2352,11 +2159,9 @@ destructor TThreadProcedures.Destroy;
 var
   cc: Integer;
 begin
-  {**
-   * Possible memory leaks, if we don't reset all references of closures
-   *}
+  // Possible memory leaks, if we don't reset all references of closures
   for cc := 0 to Length(FProcedures) - 1 do
-    FProcedures[cc]:=nil;
+    FProcedures[cc] := nil;
   FProcedures := nil;
 {$IFNDEF USE_SPIN_LOCK}
   FProceduresLock.Free;
@@ -2375,7 +2180,7 @@ begin
   try
     Index := Length(FProcedures);
     SetLength(FProcedures, Index + 1);
-    FProcedures[Index]:=ThreadProcedure;
+    FProcedures[Index] := ThreadProcedure;
   finally
 {$IFDEF USE_SPIN_LOCK}
     FProceduresLock.Exit;
@@ -2387,20 +2192,17 @@ begin
   ChangedSignal.SetEvent;
 end;
 
-{**
- * Executes all added procedures
- *
- * @return The count of executed procedures
- *}
+// Executes all added procedures
+//
+// Returns the count of executed procedures
 function TThreadProcedures.Execute: Integer;
 var
   cc, ProceduresCount: Integer;
   LocalProcedures: TThreadProcedureArray;
 begin
   Result := 0;
-  {**
-   * Copy the current added procedures locally and reset FProcedures
-   *}
+
+  // Copy the current added procedures locally and reset FProcedures
   FProceduresLock.Enter;
   try
     if not Assigned(FProcedures) then
@@ -2415,14 +2217,13 @@ begin
     FProceduresLock.Leave;
 {$ENDIF}
   end;
-  {**
-   * Whole execution is outside the lock, so Add can be further called by other threads
-   *}
+
+  // Whole execution is outside the lock, so Add can be further called by other threads
   try
     for cc := 0 to ProceduresCount - 1 do
     begin
       LocalProcedures[cc]();
-      LocalProcedures[cc]:=nil;
+      LocalProcedures[cc] := nil;
       Inc(Result);
     end;
   finally
@@ -2449,6 +2250,5 @@ finalization
 Dest.Free;
 
 {$ENDIF}
-
 
 end.
