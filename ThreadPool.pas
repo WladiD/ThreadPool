@@ -93,19 +93,19 @@ type
    *
    * Compatible to TPoolTask.IsTheSame
    *}
-  TTaskFunc = reference to function(Task:TPoolTask):Boolean;
+  TTaskFunc = reference to function(Task: TPoolTask):Boolean;
   {**
    * Status event
    *
    * @param Progress Float value between 0 and 1. 1 = 100% = Complete.
    *}
-  TStatusEvent = reference to procedure(Sender:TObject; Progress:Single);
+  TStatusEvent = reference to procedure(Sender: TObject; Progress: Single);
 
   TManagerProc = TProc<TPoolManager>;
   {**
    * Anonymous notify event, which is compatible with commonly used TNotifyEvent
    *}
-  TAnonymousNotifyEvent = reference to procedure(Sender:TObject);
+  TAnonymousNotifyEvent = reference to procedure(Sender: TObject);
 
   {**
    * TPoolTask represent a dual data holder
@@ -121,22 +121,22 @@ type
      *
      * This info is set and required only by the manager, don't access it from workers at all.
      *}
-    FProcessingBy:TPoolWorker;
+    FProcessingBy: TPoolWorker;
 
-    function GetPriority:TTaskPriority;
-    procedure SetPriority(Priority:TTaskPriority);
+    function GetPriority: TTaskPriority;
+    procedure SetPriority(Priority: TTaskPriority);
   protected
-    FOwner:TObject;
-    FOnStart:TAnonymousNotifyEvent;
-    FOnCancel:TAnonymousNotifyEvent;
-    FOnDone:TAnonymousNotifyEvent;
-    FState:TTaskState;
-    FPriority:Byte;
+    FOwner: TObject;
+    FOnStart: TAnonymousNotifyEvent;
+    FOnCancel: TAnonymousNotifyEvent;
+    FOnDone: TAnonymousNotifyEvent;
+    FState: TTaskState;
+    FPriority: Byte;
 
-    class function Compare(const Left, Right:TPoolTask):Integer; virtual;
+    class function Compare(const Left, Right: TPoolTask):Integer; virtual;
 
-    procedure Assign(Source:TPoolTask); virtual;
-    function IsTheSame(Compare:TPoolTask):Boolean; virtual;
+    procedure Assign(Source: TPoolTask); virtual;
+    function IsTheSame(Compare: TPoolTask):Boolean; virtual;
 
     {**
      * Both, Priority and PriorityRaw, sets the same field for the priority of the task
@@ -154,27 +154,27 @@ type
      *
      * @see TPoolManager.SortTasks
      *}
-    property Priority:TTaskPriority read GetPriority write SetPriority;
-    property PriorityRaw:Byte read FPriority write FPriority;
+    property Priority: TTaskPriority read GetPriority write SetPriority;
+    property PriorityRaw: Byte read FPriority write FPriority;
   public
-    constructor Create(Owner:TObject); virtual;
+    constructor Create(Owner: TObject); virtual;
 
-    function Clone:TPoolTask;
+    function Clone: TPoolTask;
 
-    property Owner:TObject read FOwner;
-    property State:TTaskState read FState;
+    property Owner: TObject read FOwner;
+    property State: TTaskState read FState;
     {**
      * Generic event, which is fired, if the processing of the task is started
      *}
-    property OnStart:TAnonymousNotifyEvent read FOnStart write FOnStart;
+    property OnStart: TAnonymousNotifyEvent read FOnStart write FOnStart;
     {**
      * Generic event, which is fired, if the task is canceled
      *}
-    property OnCancel:TAnonymousNotifyEvent read FOnCancel write FOnCancel;
+    property OnCancel: TAnonymousNotifyEvent read FOnCancel write FOnCancel;
     {**
      * Generic event, which is fired, if the task is done and was not canceled
      *}
-    property OnDone:TAnonymousNotifyEvent read FOnDone write FOnDone;
+    property OnDone: TAnonymousNotifyEvent read FOnDone write FOnDone;
   end;
 
   TThreadProcedures = class;
@@ -186,22 +186,22 @@ type
    * The Execute method is full implemented and should be not overriden by descendants, instead
    * a simple "Execution Loop" concept is introduced there:
    * - InitializeExecutionLoop is executed once before the loop
-   * - ExecutionLoop is so long executed in loop as ExecutionLoopCondition returns TRUE.
+   * - ExecutionLoop is so long executed in loop as ExecutionLoopCondition returns True.
    *   But each run of the loop requires a signal on MainSignal (see method TriggerMainSignal).
-   * - If ExecutionLoopCondition returns FALSE, the loop will be breaked and FinalizeExecutionLoop
+   * - If ExecutionLoopCondition returns False, the loop will be breaked and FinalizeExecutionLoop
    *   is called finally.
    *
    * Don't create any instances of this class!
    *}
   TPoolThread = class(TThread)
   private
-    FMainSignal:TEvent;
-    FInExecutionLoop:Boolean;
+    FMainSignal: TEvent;
+    FInExecutionLoop: Boolean;
 
-    function GetSleeping:Boolean;
+    function GetSleeping: Boolean;
   protected
     procedure ExecutionLoopInitialize; virtual; abstract;
-    function ExecutionLoopCondition:Boolean; virtual;
+    function ExecutionLoopCondition: Boolean; virtual;
     procedure ExecutionLoop; virtual; abstract;
     procedure ExecutionLoopFinalize; virtual; abstract;
 
@@ -209,23 +209,23 @@ type
 
     procedure TriggerMainSignal;
 
-    property MainSignal:TEvent read FMainSignal;
+    property MainSignal: TEvent read FMainSignal;
     {**
-     * Says, whether this thread is currently in active execution. It's FALSE, if it waits for
+     * Says, whether this thread is currently in active execution. It's False, if it waits for
      * the signal (MainSignal)
      *}
-    property InExecutionLoop:Boolean read FInExecutionLoop;
+    property InExecutionLoop: Boolean read FInExecutionLoop;
   public
-    constructor Create(CreateSuspended:Boolean);
+    constructor Create(CreateSuspended: Boolean);
     destructor Destroy; override;
 
     procedure Terminate; reintroduce; virtual;
 
     {**
      * Says, whether this thread is currently sleeping.
-     * It's TRUE, if it waits for the signal (MainSignal).
+     * It's True, if it waits for the signal (MainSignal).
      *}
-    property Sleeping:Boolean read GetSleeping;
+    property Sleeping: Boolean read GetSleeping;
   end;
 
   {**
@@ -240,23 +240,23 @@ type
   TPoolWorker = class(TPoolThread)
   private
 {$IFDEF CODE_SITE}
-    FWorkerIndex:Integer;
+    FWorkerIndex: Integer;
 {$ENDIF}
-    FOwner:TPoolManager;
-    FState:TWorkerState;
-    FCanceled:Boolean;
-    FProcessTasks:TTaskList;
+    FOwner: TPoolManager;
+    FState: TWorkerState;
+    FCanceled: Boolean;
+    FProcessTasks: TTaskList;
 
 {$IFDEF CODE_SITE}
-    property WorkerIndex:Integer read FWorkerIndex;
+    property WorkerIndex: Integer read FWorkerIndex;
 {$ENDIF}
-    property ProcessTasks:TTaskList read FProcessTasks;
+    property ProcessTasks: TTaskList read FProcessTasks;
   protected
-    FContextTask:TPoolTask;
+    FContextTask: TPoolTask;
 
-    procedure FireEvent(FireEventProc:TProc<TPoolTask>; HasEventFunc:TTaskFunc);
+    procedure FireEvent(FireEventProc: TProc<TPoolTask>; HasEventFunc: TTaskFunc);
 
-    procedure InitializeTask(SameTasks:TTaskList);
+    procedure InitializeTask(SameTasks: TTaskList);
     {**
      * ExecuteTask is the right place to implement the main work
      *
@@ -268,11 +268,11 @@ type
      * As running condition they should check for the property Canceled, not for Terminated.
      *
      * For example:
-     * - On error: DoneTask(FALSE);
-     * - On success: DoneTask(TRUE);
+     * - On error: DoneTask(False);
+     * - On success: DoneTask(True);
      *}
     procedure ExecuteTask; virtual; abstract;
-    procedure DoneTask(Successful:Boolean);
+    procedure DoneTask(Successful: Boolean);
 
     procedure ExecutionLoopInitialize; override;
     procedure ExecutionLoop; override;
@@ -280,16 +280,16 @@ type
 
     procedure Cancel;
 
-    property Owner:TPoolManager read FOwner;
-    property Canceled:Boolean read FCanceled;
-    property ContextTask:TPoolTask read FContextTask;
+    property Owner: TPoolManager read FOwner;
+    property Canceled: Boolean read FCanceled;
+    property ContextTask: TPoolTask read FContextTask;
   public
-    constructor Create(Owner:TPoolManager); virtual;
+    constructor Create(Owner: TPoolManager); virtual;
     destructor Destroy; override;
 
     procedure Terminate; override;
 
-    property State:TWorkerState read FState write FState;
+    property State: TWorkerState read FState write FState;
   end;
 
   {**
@@ -363,70 +363,70 @@ type
 
     TOwner = class
     public
-      Owner:TObject;
-      TasksTotalCount:Integer;
-      TasksDoneCount:Integer;
-      OnTasksStatus:TStatusEvent;
-      OnTasksComplete:TAnonymousNotifyEvent;
+      Owner: TObject;
+      TasksTotalCount: Integer;
+      TasksDoneCount: Integer;
+      OnTasksStatus: TStatusEvent;
+      OnTasksComplete: TAnonymousNotifyEvent;
     end;
 
     TOwnerList = TObjectList<TOwner>;
 
     TOwnersAssign = class
-      ManagerClass:TPoolManagerClass;
-      Owners:TOwnerList;
+      ManagerClass: TPoolManagerClass;
+      Owners: TOwnerList;
     end;
 
     TDemandProcAssign = class
-      ManagerClass:TPoolManagerClass;
-      DemandProc:TManagerProc;
+      ManagerClass: TPoolManagerClass;
+      DemandProc: TManagerProc;
     end;
   {**
    * Private section for class related stuff
    *}
   private
     class var
-    FSingleInstances:array of TPoolManager;
-    FDemandProcs:array of TDemandProcAssign;
-    FStoredOwners:array of TOwnersAssign;
+    FSingleInstances: array of TPoolManager;
+    FDemandProcs: array of TDemandProcAssign;
+    FStoredOwners: array of TOwnersAssign;
 {$IFNDEF COMPILER_15_UP}
-    FCPUCount:Cardinal; // Is already stored in a TThread field since Delphi XE
+    FCPUCount: Cardinal; // Is already stored in a TThread field since Delphi XE
 {$ENDIF}
 
-    class function GetDemandProcIndex(ReturnOnFreeIndex:Boolean = FALSE):Integer;
-    class function GetCPUCount:Integer;
+    class function GetDemandProcIndex(ReturnOnFreeIndex: Boolean = False):Integer;
+    class function GetCPUCount: Integer;
   {**
    * Private section for object related stuff
    *}
   private
-    FOwners:TOwnerList;
-    FOwnersDoneList:TObjectList;
-    FContextProcedures:TThreadProcedures;
-    FDemandMode:Boolean;
-    FComparer:TTaskComparer;
-    FTasksSorted:Boolean;
-    FDynamicTerminateEnabled:Boolean;
-    FWorkers:TWorkerList;
-    FTasks:TTaskList;
-    FTasksLock:TMultiReadExclusiveWriteSynchronizer;
-    FConcurrentWorkersCount:Integer;
-    FSpareWorkersCount:Integer;
+    FOwners: TOwnerList;
+    FOwnersDoneList: TObjectList;
+    FContextProcedures: TThreadProcedures;
+    FDemandMode: Boolean;
+    FComparer: TTaskComparer;
+    FTasksSorted: Boolean;
+    FDynamicTerminateEnabled: Boolean;
+    FWorkers: TWorkerList;
+    FTasks: TTaskList;
+    FTasksLock: TMultiReadExclusiveWriteSynchronizer;
+    FConcurrentWorkersCount: Integer;
+    FSpareWorkersCount: Integer;
 
-    function GetOwner(Owner:TObject; AutoAdd:Boolean = TRUE):TOwner;
-    procedure UnregisterOwner(Owner:TObject);
-    procedure OwnerAddTasksCount(Owner:TObject; AddTotalCount, AddDoneCount:Integer;
-      FireEvents:Boolean = TRUE);
-    procedure AddOwnerDone(Owner:TObject);
+    function GetOwner(Owner: TObject; AutoAdd: Boolean = True):TOwner;
+    procedure UnregisterOwner(Owner: TObject);
+    procedure OwnerAddTasksCount(Owner: TObject; AddTotalCount, AddDoneCount: Integer;
+      FireEvents: Boolean = True);
+    procedure AddOwnerDone(Owner: TObject);
     procedure StoreOwners;
 
-    procedure SetSortTasks(SortTasks:Boolean);
-    function GetSortTasks:Boolean;
+    procedure SetSortTasks(SortTasks: Boolean);
+    function GetSortTasks: Boolean;
 
-    property Owners:TOwnerList read FOwners;
+    property Owners: TOwnerList read FOwners;
     {**
      * @see TPoolManager.RegisterSingletonOnDemandProc
      *}
-    property DemandMode:Boolean read FDemandMode;
+    property DemandMode: Boolean read FDemandMode;
   {**
    * Protected section for class related stuff
    *}
@@ -434,7 +434,7 @@ type
 
     class destructor Destroy;
 
-    class procedure SingletonTerminateGate(Sender:TObject);
+    class procedure SingletonTerminateGate(Sender: TObject);
     {**
      * WorkerClass should return the class of the corresponding TPoolWorker
      *
@@ -444,18 +444,18 @@ type
      * <code>
      * TMyManager = class(TPoolManager)
      * protected
-     *   class function WorkerClass:TPoolWorkerClass; override;
+     *   class function WorkerClass: TPoolWorkerClass; override;
      * end;
      *
      * implementation
      *
-     * class function TMyManager.WorkerClass:TPoolWorkerClass;
+     * class function TMyManager.WorkerClass: TPoolWorkerClass;
      * begin
-     *   Result:=TMyWorker;
+     *   Result := TMyWorker;
      * end;
      * </code>
      *}
-    class function WorkerClass:TPoolWorkerClass; virtual; abstract;
+    class function WorkerClass: TPoolWorkerClass; virtual; abstract;
   {**
    * Protected section for object related stuff
    *}
@@ -463,59 +463,59 @@ type
     procedure BeginReadTasks;
     procedure EndReadTasks;
 
-    function BeginWriteTasks:Boolean;
+    function BeginWriteTasks: Boolean;
     procedure EndWriteTasks;
 
-    function GetTaskIndex(State:TTaskState; StartIndex:Integer):Integer;
-    function GetSameTaskIndex(CompareTask:TPoolTask; StartIndex:Integer):Integer;
+    function GetTaskIndex(State: TTaskState; StartIndex: Integer):Integer;
+    function GetSameTaskIndex(CompareTask: TPoolTask; StartIndex: Integer):Integer;
 
-    function CreateWorker:TPoolWorker; virtual;
+    function CreateWorker: TPoolWorker; virtual;
 
-    procedure CustomTaskCancel(CompareFunction:TTaskFunc);
-    function CustomTaskExists(CompareFunction:TTaskFunc):Boolean;
-    function CustomTaskCounter(CompareFunction:TTaskFunc):Integer;
+    procedure CustomTaskCancel(CompareFunction: TTaskFunc);
+    function CustomTaskExists(CompareFunction: TTaskFunc):Boolean;
+    function CustomTaskCounter(CompareFunction: TTaskFunc):Integer;
 
-    procedure WorkerTerminated(TerminatedWorker:TPoolWorker); virtual;
-    procedure WorkerTaskDone(DoneWorker:TPoolWorker; WorkerState:TWorkerState); virtual;
+    procedure WorkerTerminated(TerminatedWorker: TPoolWorker); virtual;
+    procedure WorkerTaskDone(DoneWorker: TPoolWorker; WorkerState: TWorkerState); virtual;
 
     procedure ExecutionLoopInitialize; override;
-    function ExecutionLoopCondition:Boolean; override;
+    function ExecutionLoopCondition: Boolean; override;
     procedure ExecutionLoop; override;
     procedure ExecutionLoopFinalize; override;
 
-    procedure SetConcurrentWorkersCount(ConcurrentWorkersCount:Integer);
-    procedure SetConcurrentWorkersCountPerCPU(ConcurrentWorkersCountPerCPU:Integer);
+    procedure SetConcurrentWorkersCount(ConcurrentWorkersCount: Integer);
+    procedure SetConcurrentWorkersCountPerCPU(ConcurrentWorkersCountPerCPU: Integer);
 
-    procedure SetSpareWorkersCount(SpareWorkersCount:Integer);
-    procedure SetSpareWorkersCountPerCPU(SpareWorkersCountPerCPU:Integer);
+    procedure SetSpareWorkersCount(SpareWorkersCount: Integer);
+    procedure SetSpareWorkersCountPerCPU(SpareWorkersCountPerCPU: Integer);
 
-    property Workers:TWorkerList read FWorkers;
-    property Tasks:TTaskList read FTasks;
+    property Workers: TWorkerList read FWorkers;
+    property Tasks: TTaskList read FTasks;
     {**
      * Defines, whether the tasks should be sorted, before the next is picked for processing
      *
      * How the tasks are sorted, must be implemented in the class method TPoolTask.Compare.
-     * If you need such sorting mechanism, you must set this property to TRUE in the
+     * If you need such sorting mechanism, you must set this property to True in the
      * derived constructor.
      *
      * @see TPoolTask.Compare
-     * @default FALSE
+     * @default False
      *}
-    property SortTasks:Boolean read GetSortTasks write SetSortTasks;
-    property ContextProcedures:TThreadProcedures read FContextProcedures;
+    property SortTasks: Boolean read GetSortTasks write SetSortTasks;
+    property ContextProcedures: TThreadProcedures read FContextProcedures;
   {**
    * Class related public section
    *}
   public
-    class function Singleton:TPoolManager;
-    class function HasSingleton:Boolean;
-    class procedure TerminateSingletonInstances(Wait:Boolean = TRUE);
+    class function Singleton: TPoolManager;
+    class function HasSingleton: Boolean;
+    class procedure TerminateSingletonInstances(Wait: Boolean = True);
 
-    class procedure RegisterSingletonOnDemandProc(DemandProc:TManagerProc);
-    class function HasSingletonOnDemandProc:Boolean;
+    class procedure RegisterSingletonOnDemandProc(DemandProc: TManagerProc);
+    class function HasSingletonOnDemandProc: Boolean;
     class procedure UnregisterSingletonOnDemandProc;
 
-    class procedure DispatchOwnerDestroyed(Owner:TObject);
+    class procedure DispatchOwnerDestroyed(Owner: TObject);
   {**
    * Object related public section
    *}
@@ -525,26 +525,26 @@ type
 
     procedure Terminate; override;
 
-    procedure AddTask(Task:TPoolTask); virtual;
+    procedure AddTask(Task: TPoolTask); virtual;
 
     procedure CancelAllTasks;
-    procedure CancelTasksByOwner(Owner:TObject);
-    procedure CancelTasksBySame(Task:TPoolTask);
+    procedure CancelTasksByOwner(Owner: TObject);
+    procedure CancelTasksBySame(Task: TPoolTask);
 
-    function TaskExists(Task:TPoolTask):Boolean;
+    function TaskExists(Task: TPoolTask):Boolean;
 
-    function TasksCountByOwner(Owner:TObject):Integer;
+    function TasksCountByOwner(Owner: TObject):Integer;
 
-    procedure RegisterOwner(Owner:TObject; OnTasksStatus:TStatusEvent;
-      OnTasksComplete:TAnonymousNotifyEvent);
-    function RestoreOwners:Boolean;
+    procedure RegisterOwner(Owner: TObject; OnTasksStatus: TStatusEvent;
+      OnTasksComplete: TAnonymousNotifyEvent);
+    function RestoreOwners: Boolean;
 
     {**
      * Defines, how many worker threads (derived from TPoolWorker) are at the same time allowed
      *
      * @default 8
      *}
-    property ConcurrentWorkersCount:Integer read FConcurrentWorkersCount
+    property ConcurrentWorkersCount: Integer read FConcurrentWorkersCount
       write SetConcurrentWorkersCount;
     {**
      * Defines, how many workers for each CPU are at the same time allowed
@@ -553,7 +553,7 @@ type
      *
      * @see TPoolManager.ConcurrentWorkersCount
      *}
-    property ConcurrentWorkersCountPerCPU:Integer write SetConcurrentWorkersCountPerCPU;
+    property ConcurrentWorkersCountPerCPU: Integer write SetConcurrentWorkersCountPerCPU;
     {**
      * Defines, how many worker threads should be spared
      *
@@ -566,7 +566,7 @@ type
      *
      * @default 0
      *}
-    property SpareWorkersCount:Integer read FSpareWorkersCount write SetSpareWorkersCount;
+    property SpareWorkersCount: Integer read FSpareWorkersCount write SetSpareWorkersCount;
     {**
      * Defines, how many workers for each CPU should be spared
      * This is a write only property. To determine, how many spared workers are indeed defined,
@@ -574,7 +574,7 @@ type
      *
      * @see TPoolManager.SpareWorkersCount
      *}
-    property SpareWorkersCountPerCPU:Integer write SetSpareWorkersCountPerCPU;
+    property SpareWorkersCountPerCPU: Integer write SetSpareWorkersCountPerCPU;
   end;
 
   TThreadProcedures = class
@@ -583,57 +583,57 @@ type
     TThreadProcedureArray = array of TThreadProcedure;
 
     var
-    FProcedures:TThreadProcedureArray;
+    FProcedures: TThreadProcedureArray;
 {$IFDEF USE_SPIN_LOCK}
-    FProceduresLock:TSpinLock;
+    FProceduresLock: TSpinLock;
 {$ELSE}
-    FProceduresLock:TCriticalSection;
+    FProceduresLock: TCriticalSection;
 {$ENDIF}
-    FChangedSignal:TEvent;
-    FOwnChangedSignal:Boolean;
+    FChangedSignal: TEvent;
+    FOwnChangedSignal: Boolean;
   public
-    constructor Create(ForeignChangedSignal:TEvent = nil);
+    constructor Create(ForeignChangedSignal: TEvent = nil);
     destructor Destroy; override;
 
-    procedure Add(ThreadProcedure:TThreadProcedure);
-    function Execute:Integer;
+    procedure Add(ThreadProcedure: TThreadProcedure);
+    function Execute: Integer;
 
-    property ChangedSignal:TEvent read FChangedSignal;
+    property ChangedSignal: TEvent read FChangedSignal;
   end;
 
 implementation
 
 {** TPoolTask **}
 
-constructor TPoolTask.Create(Owner:TObject);
+constructor TPoolTask.Create(Owner: TObject);
 begin
-  FOwner:=Owner;
-  FState:=tsUnknown;
-  Priority:=tpNormal;
+  FOwner := Owner;
+  FState := tsUnknown;
+  Priority := tpNormal;
 end;
 
 {**
  * Getter for the property Priority
  *}
-function TPoolTask.GetPriority:TTaskPriority;
+function TPoolTask.GetPriority: TTaskPriority;
 begin
   case FPriority of
     Ord(tpLowest):
-      Result:=tpLowest;
+      Result := tpLowest;
     Ord(tpLower):
-      Result:=tpLower;
+      Result := tpLower;
     Ord(tpLow):
-      Result:=tpLow;
+      Result := tpLow;
     Ord(tpNormal):
-      Result:=tpNormal;
+      Result := tpNormal;
     Ord(tpHigh):
-      Result:=tpHigh;
+      Result := tpHigh;
     Ord(tpHigher):
-      Result:=tpHigher;
+      Result := tpHigher;
     Ord(tpHighest):
-      Result:=tpHighest;
+      Result := tpHighest;
     else
-      Result:=tpCustom;
+      Result := tpCustom;
   end;
 end;
 
@@ -645,13 +645,13 @@ end;
  *}
 function TPoolTask.IsTheSame(Compare: TPoolTask): Boolean;
 begin
-  Result:=FALSE;
+  Result := False;
 end;
 
-procedure TPoolTask.SetPriority(Priority:TTaskPriority);
+procedure TPoolTask.SetPriority(Priority: TTaskPriority);
 begin
   Assert(Priority <> tpCustom, 'The priority "tpCustom" can''t be assigned.');
-  FPriority:=Ord(Priority);
+  FPriority := Ord(Priority);
 end;
 
 {**
@@ -660,20 +660,20 @@ end;
  * The Assign method should only assign events and fields, which are required for doing the task,
  * no results.
  *}
-procedure TPoolTask.Assign(Source:TPoolTask);
+procedure TPoolTask.Assign(Source: TPoolTask);
 begin
-  PriorityRaw:=Source.PriorityRaw;
-  OnDone:=Source.OnDone;
-  OnStart:=Source.OnStart;
-  OnCancel:=Source.OnCancel;
+  PriorityRaw := Source.PriorityRaw;
+  OnDone := Source.OnDone;
+  OnStart := Source.OnStart;
+  OnCancel := Source.OnCancel;
 end;
 
 {**
  * Creates a new instance of the task
  *}
-function TPoolTask.Clone:TPoolTask;
+function TPoolTask.Clone: TPoolTask;
 begin
-  Result:=TPoolTaskClass(ClassType).Create(Owner);
+  Result := TPoolTaskClass(ClassType).Create(Owner);
   Result.Assign(Self);
 end;
 
@@ -686,18 +686,18 @@ end;
  * @see TPoolTask.Priority
  * @see TPoolManager.SortTasks
  *}
-class function TPoolTask.Compare(const Left, Right:TPoolTask):Integer;
+class function TPoolTask.Compare(const Left, Right: TPoolTask):Integer;
 begin
-  Result:=Right.FPriority - Left.FPriority;
+  Result := Right.FPriority - Left.FPriority;
 end;
 
 {** TPoolThread **}
 
-constructor TPoolThread.Create(CreateSuspended:Boolean);
+constructor TPoolThread.Create(CreateSuspended: Boolean);
 begin
   inherited Create(CreateSuspended);
 
-  FMainSignal:=TEvent.Create(nil, FALSE, FALSE, '');
+  FMainSignal := TEvent.Create(nil, False, False, '');
 end;
 
 destructor TPoolThread.Destroy;
@@ -707,9 +707,9 @@ begin
   inherited Destroy;
 end;
 
-function TPoolThread.GetSleeping:Boolean;
+function TPoolThread.GetSleeping: Boolean;
 begin
-  Result:=not InExecutionLoop;
+  Result := not InExecutionLoop;
 end;
 
 procedure TPoolThread.TriggerMainSignal;
@@ -738,14 +738,14 @@ begin
     begin
       MainSignal.WaitFor(INFINITE);
 
-      FInExecutionLoop:=TRUE;
+      FInExecutionLoop := True;
       try
 {$IFDEF CODE_SITE}
         CodeSite.AddSeparator;
 {$ENDIF}
         ExecutionLoop;
       finally
-        FInExecutionLoop:=FALSE;
+        FInExecutionLoop := False;
       end;
     end;
   finally
@@ -753,9 +753,9 @@ begin
   end;
 end;
 
-function TPoolThread.ExecutionLoopCondition:Boolean;
+function TPoolThread.ExecutionLoopCondition: Boolean;
 begin
-  Result:=not Terminated;
+  Result := not Terminated;
 end;
 
 procedure TPoolThread.Terminate;
@@ -766,13 +766,13 @@ end;
 
 {** TPoolWorker **}
 
-constructor TPoolWorker.Create(Owner:TPoolManager);
+constructor TPoolWorker.Create(Owner: TPoolManager);
 begin
-  inherited Create(FALSE);
+  inherited Create(False);
 
-  FOwner:=Owner;
-  FProcessTasks:=TTaskList.Create(FALSE);
-  FreeOnTerminate:=TRUE;
+  FOwner := Owner;
+  FProcessTasks := TTaskList.Create(False);
+  FreeOnTerminate := True;
 end;
 
 destructor TPoolWorker.Destroy;
@@ -798,13 +798,13 @@ begin
     begin
 
       FireEvent(
-        procedure(Task:TPoolTask)
+        procedure(Task: TPoolTask)
         begin
           Task.OnStart(ContextTask);
         end,
-        function(Task:TPoolTask):Boolean
+        function(Task: TPoolTask):Boolean
         begin
-          Result:=Assigned(Task.OnStart);
+          Result := Assigned(Task.OnStart);
         end);
 {$IFDEF CSW_EXECUTE_TASK}
       CodeSite.EnterMethod(Self, 'ExecuteTask');
@@ -815,7 +815,7 @@ begin
 {$ENDIF}
     end;
   finally
-    FCanceled:=FALSE;
+    FCanceled := False;
   end;
 {$IFDEF CSW_EXECUTION_LOOP}
   CodeSite.ExitMethod(Self, 'ExecutionLoop');
@@ -834,26 +834,26 @@ begin
 {$ENDIF}
 end;
 
-procedure TPoolWorker.FireEvent(FireEventProc:TProc<TPoolTask>; HasEventFunc:TTaskFunc);
+procedure TPoolWorker.FireEvent(FireEventProc: TProc<TPoolTask>; HasEventFunc: TTaskFunc);
 var
-  FireEventTasks:TTaskList;
-  SynchronizeProc:TThreadProcedure;
-  cc:Integer;
-  HasHasEventFunc:Boolean;
+  FireEventTasks: TTaskList;
+  SynchronizeProc: TThreadProcedure;
+  cc: Integer;
+  HasHasEventFunc: Boolean;
 
-  function IsTaskValid(Task:TPoolTask):Boolean;
+  function IsTaskValid(Task: TPoolTask):Boolean;
   begin
-    Result:=Owner.Tasks.IndexOf(Task) >= 0;
+    Result := Owner.Tasks.IndexOf(Task) >= 0;
   end;
 
 begin
-  SynchronizeProc:=nil;
-  HasHasEventFunc:=Assigned(HasEventFunc);
-  FireEventTasks:=TTaskList.Create(TRUE);
+  SynchronizeProc := nil;
+  HasHasEventFunc := Assigned(HasEventFunc);
+  FireEventTasks := TTaskList.Create(True);
   try
     Owner.BeginReadTasks;
     try
-      for cc:=0 to ProcessTasks.Count - 1 do
+      for cc := 0 to ProcessTasks.Count - 1 do
         if IsTaskValid(ProcessTasks[cc]) and
           (
             not HasHasEventFunc or
@@ -866,11 +866,11 @@ begin
 
       if FireEventTasks.Count > 0 then
       begin
-        SynchronizeProc:=procedure
+        SynchronizeProc := procedure
         var
-          cc:Integer;
+          cc: Integer;
         begin
-          for cc:=0 to FireEventTasks.Count - 1 do
+          for cc := 0 to FireEventTasks.Count - 1 do
             FireEventProc(FireEventTasks[cc]);
         end;
       end;
@@ -885,9 +885,9 @@ begin
     {**
      * Prevent memory leaks
      *}
-    FireEventProc:=nil;
-    HasEventFunc:=nil;
-    SynchronizeProc:=nil;
+    FireEventProc := nil;
+    HasEventFunc := nil;
+    SynchronizeProc := nil;
   end;
 end;
 
@@ -897,38 +897,23 @@ end;
  * - The passed list should never be empty
  * - The tasks in the list must have as State = tsInWork
  *}
-procedure TPoolWorker.InitializeTask(SameTasks:TTaskList);
-
-{$IFNDEF COMPILER_15_UP}
-  procedure AddProcessTasks;
-  var
-    cc:Integer;
-  begin
-    for cc:=0 to SameTasks.Count - 1 do
-      FProcessTasks.Add(SameTasks[cc]);
-  end;
-{$ENDIF}
-
+procedure TPoolWorker.InitializeTask(SameTasks: TTaskList);
 begin
   if Assigned(FContextTask) then
     FreeAndNil(FContextTask);
 
   FProcessTasks.Clear;
   if SameTasks.Count > 1 then
-{$IFDEF COMPILER_15_UP}
-    FProcessTasks.AddRange(SameTasks) // This will not work on Delphi 2010: compiler error
-{$ELSE}
-    AddProcessTasks
-{$ENDIF}
+    FProcessTasks.AddRange(SameTasks)
   else
     FProcessTasks.Add(SameTasks[0]);
   {**
    * The context task is always a clone of the first task
    *}
-  FContextTask:=SameTasks[0].Clone;
-  ContextTask.FOwner:=Self;
+  FContextTask := SameTasks[0].Clone;
+  ContextTask.FOwner := Self;
 
-  State:=wsBusy;
+  State := wsBusy;
 
   TriggerMainSignal;
 end;
@@ -939,9 +924,9 @@ end;
  *
  * @see TPoolWorker.ExecuteTask
  *}
-procedure TPoolWorker.DoneTask(Successful:Boolean);
+procedure TPoolWorker.DoneTask(Successful: Boolean);
 var
-  DoneState:TWorkerState;
+  DoneState: TWorkerState;
 begin
 {$IFDEF CSW_DONE_TASK}
   CodeSite.EnterMethod(Self, 'DoneTask');
@@ -951,25 +936,25 @@ begin
   begin
     try
       if Successful then
-        ContextTask.FState:=tsSuccess
+        ContextTask.FState := tsSuccess
       else
-        ContextTask.FState:=tsError;
+        ContextTask.FState := tsError;
       FireEvent(
-        procedure(DoneTask:TPoolTask)
+        procedure(DoneTask: TPoolTask)
         begin
           DoneTask.OnDone(ContextTask);
         end,
-        function(DoneTask:TPoolTask):Boolean
+        function(DoneTask: TPoolTask):Boolean
         begin
-          Result:=Assigned(DoneTask.OnDone);
+          Result := Assigned(DoneTask.OnDone);
         end);
     finally
-      DoneState:=wsTaskDone;
+      DoneState := wsTaskDone;
     end;
   end
   else
   begin
-    DoneState:=wsReady;
+    DoneState := wsReady;
 {$IFDEF CSW_DONE_TASK}
     CodeSite.SendWarning('Canceled');
 {$ENDIF}
@@ -992,50 +977,50 @@ end;
 procedure TPoolWorker.Cancel;
 begin
   if not Canceled then
-    FCanceled:=TRUE;
+    FCanceled := True;
 end;
 
 {** TPoolManager **}
 
 class destructor TPoolManager.Destroy;
 var
-  cc:Integer;
+  cc: Integer;
 begin
-  for cc:=0 to Length(FDemandProcs) - 1 do
+  for cc := 0 to Length(FDemandProcs) - 1 do
     if Assigned(FDemandProcs[cc]) then
     begin
-      FDemandProcs[cc].DemandProc:=nil; // prevent a possible memory leak
+      FDemandProcs[cc].DemandProc := nil; // prevent a possible memory leak
       FDemandProcs[cc].Free;
     end;
-  FDemandProcs:=nil;
+  FDemandProcs := nil;
 
-  for cc:=0 to Length(FStoredOwners) - 1 do
+  for cc := 0 to Length(FStoredOwners) - 1 do
     if Assigned(FStoredOwners[cc]) then
     begin
       if Assigned(FStoredOwners[cc].Owners) then
         FStoredOwners[cc].Owners.Free;
       FStoredOwners[cc].Free;
     end;
-  FStoredOwners:=nil;
+  FStoredOwners := nil;
 end;
 
 constructor TPoolManager.Create;
 begin
   {**
-   * The manager should start immediately (Suspended = FALSE)
+   * The manager should start immediately (Suspended = False)
    *}
-  inherited Create(FALSE);
+  inherited Create(False);
 
-  FWorkers:=TWorkerList.Create(FALSE);
-  FTasks:=TTaskList.Create(TRUE);
-  FOwners:=TOwnerList.Create(TRUE);
-  FOwnersDoneList:=TObjectList.Create(FALSE);
-  FConcurrentWorkersCount:=8;
-  FSpareWorkersCount:=0;
-  FTasksLock:=TMultiReadExclusiveWriteSynchronizer.Create;
-  FContextProcedures:=TThreadProcedures.Create(MainSignal);
+  FWorkers := TWorkerList.Create(False);
+  FTasks := TTaskList.Create(True);
+  FOwners := TOwnerList.Create(True);
+  FOwnersDoneList := TObjectList.Create(False);
+  FConcurrentWorkersCount := 8;
+  FSpareWorkersCount := 0;
+  FTasksLock := TMultiReadExclusiveWriteSynchronizer.Create;
+  FContextProcedures := TThreadProcedures.Create(MainSignal);
 
-  FreeOnTerminate:=TRUE;
+  FreeOnTerminate := True;
 end;
 
 destructor TPoolManager.Destroy;
@@ -1044,14 +1029,14 @@ begin
   FWorkers.Free;
   FOwners.Free;
   FOwnersDoneList.Free;
-  SortTasks:=FALSE; // Destroy the comparer
+  SortTasks := False; // Destroy the comparer
   FTasksLock.Free;
   FContextProcedures.Free;
 
   inherited Destroy;
 end;
 
-procedure TPoolManager.AddOwnerDone(Owner:TObject);
+procedure TPoolManager.AddOwnerDone(Owner: TObject);
 begin
   if not Assigned(Owner) then
     Exit;
@@ -1073,7 +1058,7 @@ end;
  *   begin the work
  * - Otherwise, this task waiting for processing, until one of the above condition are be true
  *}
-procedure TPoolManager.AddTask(Task:TPoolTask);
+procedure TPoolManager.AddTask(Task: TPoolTask);
 begin
   ContextProcedures.Add(
     procedure
@@ -1081,8 +1066,8 @@ begin
       BeginWriteTasks;
       try
         Tasks.Add(Task);
-        OwnerAddTasksCount(Task.Owner, 1, 0, FALSE);
-        FTasksSorted:=FALSE;
+        OwnerAddTasksCount(Task.Owner, 1, 0, False);
+        FTasksSorted := False;
       finally
         EndWriteTasks;
       end;
@@ -1094,26 +1079,26 @@ begin
   FTasksLock.BeginRead;
 end;
 
-function TPoolManager.BeginWriteTasks:Boolean;
+function TPoolManager.BeginWriteTasks: Boolean;
 begin
-  Result:=FTasksLock.BeginWrite;
+  Result := FTasksLock.BeginWrite;
 end;
 
 {**
  * Customizable cancel method for tasks, through the ability for passing a anonymous compare method
  *
- * @param CompareFunction Each task on which this method answers with TRUE, will be canceled
+ * @param CompareFunction Each task on which this method answers with True, will be canceled
  *}
-procedure TPoolManager.CustomTaskCancel(CompareFunction:TTaskFunc);
+procedure TPoolManager.CustomTaskCancel(CompareFunction: TTaskFunc);
 var
-  CanceledTasks:TTaskList;
-  TaskIndex, WorkerIndex:Integer;
+  CanceledTasks: TTaskList;
+  TaskIndex, WorkerIndex: Integer;
 begin
-  CanceledTasks:=TTaskList.Create(TRUE);
+  CanceledTasks := TTaskList.Create(True);
   try
     BeginWriteTasks;
     try
-      TaskIndex:=0;
+      TaskIndex := 0;
       while TaskIndex < Tasks.Count do
       begin
         if Assigned(Tasks[TaskIndex]) and CompareFunction(Tasks[TaskIndex]) then
@@ -1123,7 +1108,7 @@ begin
            *}
           if (Tasks[TaskIndex].State = tsInWork) and
             Assigned(Tasks[TaskIndex].FProcessingBy) then
-            WorkerIndex:=Workers.IndexOf(Tasks[TaskIndex].FProcessingBy)
+            WorkerIndex := Workers.IndexOf(Tasks[TaskIndex].FProcessingBy)
           else
             WorkerIndex:=-1;
           {**
@@ -1164,10 +1149,10 @@ begin
       Queue(
         procedure
         var
-          cc:Integer;
+          cc: Integer;
         begin
           try
-            for cc:=0 to CanceledTasks.Count - 1 do
+            for cc := 0 to CanceledTasks.Count - 1 do
               CanceledTasks[cc].OnCancel(CanceledTasks[cc]);
           finally
             CanceledTasks.Free;
@@ -1179,36 +1164,36 @@ begin
   end;
 end;
 
-function TPoolManager.CustomTaskCounter(CompareFunction:TTaskFunc):Integer;
+function TPoolManager.CustomTaskCounter(CompareFunction: TTaskFunc):Integer;
 var
-  cc:Integer;
+  cc: Integer;
 begin
-  Result:=0;
+  Result := 0;
   BeginReadTasks;
   try
-    for cc:=0 to Tasks.Count - 1 do
+    for cc := 0 to Tasks.Count - 1 do
       Inc(Result, Ord(Assigned(Tasks[cc]) and CompareFunction(Tasks[cc])));
   finally
     EndReadTasks;
-    CompareFunction:=nil;
+    CompareFunction := nil;
   end;
 end;
 
-function TPoolManager.CustomTaskExists(CompareFunction:TTaskFunc):Boolean;
+function TPoolManager.CustomTaskExists(CompareFunction: TTaskFunc):Boolean;
 var
-  cc:Integer;
+  cc: Integer;
 begin
   BeginReadTasks;
   try
-    cc:=0;
+    cc := 0;
 
     while (cc < Tasks.Count) and not (Assigned(Tasks[cc]) and CompareFunction(Tasks[cc])) do
       Inc(cc);
 
-    Result:=cc < Tasks.Count;
+    Result := cc < Tasks.Count;
   finally
     EndReadTasks;
-    CompareFunction:=nil;
+    CompareFunction := nil;
   end;
 end;
 
@@ -1217,7 +1202,7 @@ end;
  *
  * @see TPoolTask.IsTheSame
  *}
-procedure TPoolManager.CancelTasksBySame(Task:TPoolTask);
+procedure TPoolManager.CancelTasksBySame(Task: TPoolTask);
 begin
   ContextProcedures.Add(
     procedure
@@ -1232,9 +1217,9 @@ begin
     procedure
     begin
       CustomTaskCancel(
-        function(Compare:TPoolTask):Boolean
+        function(Compare: TPoolTask):Boolean
         begin
-          Result:=TRUE;
+          Result := True;
         end);
     end);
 end;
@@ -1244,15 +1229,15 @@ end;
  *
  * @see TPoolTask.Owner
  *}
-procedure TPoolManager.CancelTasksByOwner(Owner:TObject);
+procedure TPoolManager.CancelTasksByOwner(Owner: TObject);
 begin
   ContextProcedures.Add(
     procedure
     begin
       CustomTaskCancel(
-        function(Compare:TPoolTask):Boolean
+        function(Compare: TPoolTask):Boolean
         begin
-          Result:=Compare.Owner = Owner;
+          Result := Compare.Owner = Owner;
         end);
     end);
 end;
@@ -1270,36 +1255,36 @@ end;
 {**
  * Updates the internal owner based statistics
  *}
-procedure TPoolManager.OwnerAddTasksCount(Owner:TObject; AddTotalCount, AddDoneCount:Integer;
-  FireEvents:Boolean);
+procedure TPoolManager.OwnerAddTasksCount(Owner: TObject; AddTotalCount, AddDoneCount: Integer;
+  FireEvents: Boolean);
 var
-  OwnerEntry, OriginOwnerEntry:TOwner;
-  SyncProc:TThreadProcedure;
+  OwnerEntry, OriginOwnerEntry: TOwner;
+  SyncProc: TThreadProcedure;
 begin
   if not Assigned(Owner) or ((AddTotalCount = 0) and (AddDoneCount = 0)) then
     Exit;
-  SyncProc:=nil;
+  SyncProc := nil;
 
-  OriginOwnerEntry:=GetOwner(Owner);
+  OriginOwnerEntry := GetOwner(Owner);
   if AddTotalCount <> 0 then
-    OriginOwnerEntry.TasksTotalCount:=OriginOwnerEntry.TasksTotalCount + AddTotalCount;
+    OriginOwnerEntry.TasksTotalCount := OriginOwnerEntry.TasksTotalCount + AddTotalCount;
   if AddDoneCount <> 0 then
-    OriginOwnerEntry.TasksDoneCount:=OriginOwnerEntry.TasksDoneCount + AddDoneCount;
+    OriginOwnerEntry.TasksDoneCount := OriginOwnerEntry.TasksDoneCount + AddDoneCount;
 
   {**
    * Local clone for the OwnerEntry
    *}
-  OwnerEntry:=TOwner.Create;
-  OwnerEntry.Owner:=Owner;
-  OwnerEntry.TasksDoneCount:=OriginOwnerEntry.TasksDoneCount;
-  OwnerEntry.TasksTotalCount:=OriginOwnerEntry.TasksTotalCount;
-  OwnerEntry.OnTasksStatus:=OriginOwnerEntry.OnTasksStatus;
-  OwnerEntry.OnTasksComplete:=OriginOwnerEntry.OnTasksComplete;
+  OwnerEntry := TOwner.Create;
+  OwnerEntry.Owner := Owner;
+  OwnerEntry.TasksDoneCount := OriginOwnerEntry.TasksDoneCount;
+  OwnerEntry.TasksTotalCount := OriginOwnerEntry.TasksTotalCount;
+  OwnerEntry.OnTasksStatus := OriginOwnerEntry.OnTasksStatus;
+  OwnerEntry.OnTasksComplete := OriginOwnerEntry.OnTasksComplete;
 
   if FireEvents and Assigned(OwnerEntry.OnTasksStatus) and
     (OwnerEntry.TasksDoneCount < OwnerEntry.TasksTotalCount) then
   begin
-    SyncProc:=procedure
+    SyncProc := procedure
       begin
         try
           OwnerEntry.OnTasksStatus(Owner,
@@ -1313,7 +1298,7 @@ begin
   begin
     if FireEvents and
       (Assigned(OwnerEntry.OnTasksComplete) or Assigned(OwnerEntry.OnTasksStatus)) then
-      SyncProc:=procedure
+      SyncProc := procedure
         begin
           try
             if Assigned(OwnerEntry.OnTasksStatus) then
@@ -1324,10 +1309,10 @@ begin
             OwnerEntry.Free;
           end;
         end;
-    OwnerEntry.TasksTotalCount:=0;
-    OwnerEntry.TasksDoneCount:=0;
-    OriginOwnerEntry.TasksTotalCount:=0;
-    OriginOwnerEntry.TasksDoneCount:=0;
+    OwnerEntry.TasksTotalCount := 0;
+    OwnerEntry.TasksDoneCount := 0;
+    OriginOwnerEntry.TasksTotalCount := 0;
+    OriginOwnerEntry.TasksDoneCount := 0;
   end;
 
   if Assigned(SyncProc) then
@@ -1349,33 +1334,33 @@ end;
  *
  * @see TPoolManager.DispatchOwnerDestroyed
  *}
-procedure TPoolManager.RegisterOwner(Owner:TObject; OnTasksStatus:TStatusEvent;
-  OnTasksComplete:TAnonymousNotifyEvent);
+procedure TPoolManager.RegisterOwner(Owner: TObject; OnTasksStatus: TStatusEvent;
+  OnTasksComplete: TAnonymousNotifyEvent);
 begin
   Assert(Assigned(Owner), 'You can''t register a nil owner.');
 
   ContextProcedures.Add(
     procedure
     var
-      OwnerEntry:TOwner;
+      OwnerEntry: TOwner;
     begin
-      OwnerEntry:=GetOwner(Owner);
-      OwnerEntry.OnTasksStatus:=OnTasksStatus;
-      OwnerEntry.OnTasksComplete:=OnTasksComplete;
+      OwnerEntry := GetOwner(Owner);
+      OwnerEntry.OnTasksStatus := OnTasksStatus;
+      OwnerEntry.OnTasksComplete := OnTasksComplete;
     end);
 end;
 
-function TPoolManager.GetTaskIndex(State:TTaskState; StartIndex:Integer):Integer;
+function TPoolManager.GetTaskIndex(State: TTaskState; StartIndex: Integer):Integer;
 begin
-  for Result:=StartIndex to Tasks.Count - 1 do
+  for Result := StartIndex to Tasks.Count - 1 do
     if Assigned(Tasks[Result]) and (Tasks[Result].State = State) then
       Exit;
   Result:=-1;
 end;
 
-function TPoolManager.GetSameTaskIndex(CompareTask:TPoolTask; StartIndex:Integer):Integer;
+function TPoolManager.GetSameTaskIndex(CompareTask: TPoolTask; StartIndex: Integer):Integer;
 begin
-  for Result:=StartIndex to Tasks.Count - 1 do
+  for Result := StartIndex to Tasks.Count - 1 do
     if Assigned(Tasks[Result]) and (CompareTask.IsTheSame(Tasks[Result])) then
       Exit;
   Result:=-1;
@@ -1384,47 +1369,47 @@ end;
 {**
  * Getter for the property SortTasks
  *}
-function TPoolManager.GetSortTasks:Boolean;
+function TPoolManager.GetSortTasks: Boolean;
 begin
-  Result:=Assigned(FComparer);
+  Result := Assigned(FComparer);
 end;
 
-class function TPoolManager.GetCPUCount:Integer;
+class function TPoolManager.GetCPUCount: Integer;
 begin
 {$IFDEF COMPILER_15_UP}
-  Result:=ProcessorCount; // ProcessorCount is available since Delphi XE
+  Result := ProcessorCount; // ProcessorCount is available since Delphi XE
 {$ELSE}
   if FCPUCount = 0 then
-    FCPUCount:=System.CPUCount;
-  Result:=FCPUCount;
+    FCPUCount := System.CPUCount;
+  Result := FCPUCount;
 {$ENDIF}
 end;
 
 {**
  * Notice...
  * - that this method has no locks!
- * - when AutoAdd is TRUE (default), so you must obtain a write lock before
+ * - when AutoAdd is True (default), so you must obtain a write lock before
  *}
-function TPoolManager.GetOwner(Owner:TObject; AutoAdd:Boolean):TOwner;
+function TPoolManager.GetOwner(Owner: TObject; AutoAdd: Boolean):TOwner;
 var
-  Index:Integer;
+  Index: Integer;
 begin
-  Index:=0;
+  Index := 0;
   while (Index < Owners.Count) and (Owners[Index].Owner <> Owner) do
     Inc(Index);
   if Index = Owners.Count then
   begin
     if AutoAdd then
     begin
-      Result:=TOwner.Create;
-      Result.Owner:=Owner;
+      Result := TOwner.Create;
+      Result.Owner := Owner;
       Owners.Add(Result);
     end
     else
-      Result:=nil;
+      Result := nil;
   end
   else
-    Result:=Owners[Index]
+    Result := Owners[Index]
 end;
 
 {**
@@ -1435,34 +1420,34 @@ end;
  *
  * @see TPoolManager.GetReadyWorker
  *}
-function TPoolManager.CreateWorker:TPoolWorker;
+function TPoolManager.CreateWorker: TPoolWorker;
 begin
-  Result:=WorkerClass.Create(Self);
+  Result := WorkerClass.Create(Self);
 end;
 
 procedure TPoolManager.ExecutionLoopInitialize;
 begin
-  FDynamicTerminateEnabled:=FALSE;
+  FDynamicTerminateEnabled := False;
 end;
 
 procedure TPoolManager.ExecutionLoop;
 var
-  ConcurrentWorkersCount, SpareWorkersCount:Integer;
+  ConcurrentWorkersCount, SpareWorkersCount: Integer;
 
-  function DynamicTerminate:Boolean;
+  function DynamicTerminate: Boolean;
 
-    function HasTasks:Boolean;
+    function HasTasks: Boolean;
     begin
       BeginReadTasks;
       try
-        Result:=Tasks.Count > 0;
+        Result := Tasks.Count > 0;
       finally
         EndReadTasks;
       end;
     end;
 
   begin
-    Result:=FDynamicTerminateEnabled and (SpareWorkersCount = 0) and not HasTasks;
+    Result := FDynamicTerminateEnabled and (SpareWorkersCount = 0) and not HasTasks;
   end;
 
   {**
@@ -1473,10 +1458,10 @@ var
   procedure CheckContextProcedures;
 {$IFDEF CSM_CHECK_CONTEXT_PROCEDURES}
   var
-    ExecutedProcedures:Integer;
+    ExecutedProcedures: Integer;
   begin
     CodeSite.EnterMethod(Self, 'CheckContextProcedures');
-    ExecutedProcedures:=ContextProcedures.Execute;
+    ExecutedProcedures := ContextProcedures.Execute;
     CodeSite.Send('Executed procedures', ExecutedProcedures);
     CodeSite.ExitMethod(Self, 'CheckContextProcedures');
 {$ELSE}
@@ -1489,13 +1474,13 @@ var
    * Check, whether there are further tasks for processing and try to assign it to a new or
    * sleeping worker
    *
-   * @return TRUE, if there are further outstanding tasks
+   * @return True, if there are further outstanding tasks
    *}
   procedure CheckOutstandigTasks;
   var
-    TaskIndex:Integer;
-    SameTasks:TTaskList;
-    Worker:TPoolWorker;
+    TaskIndex: Integer;
+    SameTasks: TTaskList;
+    Worker: TPoolWorker;
 
     {**
      * Says, whether there are sleeping workers or the defined boundig (ConcurrentWorkersCount)
@@ -1503,29 +1488,29 @@ var
      *
      * It's just a try to determine this and you should don't surely rely on the answer,
      * because the lock on Workers is acquired and released again. So there are possible
-     * situations, that this method return TRUE and the next call on GetReadyWorker
+     * situations, that this method return True and the next call on GetReadyWorker
      * delivers nil. But you can use it as a condition to enters a complex code section,
      * as long you check the result of GetReadyWorker against nil.
      *}
-    function HasReadyWorkers:Boolean;
+    function HasReadyWorkers: Boolean;
     var
-      cc, WorkersCount:Integer;
+      cc, WorkersCount: Integer;
     begin
-      WorkersCount:=Workers.Count;
+      WorkersCount := Workers.Count;
       {**
        * First (fast) try: Check the bounding
        *}
-      Result:=WorkersCount < ConcurrentWorkersCount;
+      Result := WorkersCount < ConcurrentWorkersCount;
       if Result then
         Exit;
       {**
        * Second (slow) try: Search for a sleeping worker
        *}
-      Result:=TRUE;
-      for cc:=0 to WorkersCount - 1 do
+      Result := True;
+      for cc := 0 to WorkersCount - 1 do
         if not Workers[cc].Terminated and (Workers[cc].State = wsReady) then
           Exit;
-      Result:=FALSE;
+      Result := False;
     end;
 
     {**
@@ -1541,62 +1526,62 @@ var
      * @see TPoolManager.ConcurrentWorkersCount
      * @see TPoolManager.CreateWorker
      *}
-    function GetReadyWorker:TPoolWorker;
+    function GetReadyWorker: TPoolWorker;
     var
-      cc, WorkersCount:Integer;
+      cc, WorkersCount: Integer;
     begin
-      Result:=nil;
+      Result := nil;
       {**
        * Search for a sleeping worker
        *}
-      WorkersCount:=Workers.Count;
+      WorkersCount := Workers.Count;
       if WorkersCount > ConcurrentWorkersCount then
         Exit;
-      for cc:=0 to WorkersCount - 1 do
+      for cc := 0 to WorkersCount - 1 do
       begin
-        Result:=Workers[cc];
+        Result := Workers[cc];
         if not Result.Terminated and (Result.State = wsReady) then
           Break
         else
-          Result:=nil;
+          Result := nil;
       end;
       {**
        * No sleeping worker found, try to create a new one
        *}
       if not Assigned(Result) and (WorkersCount < ConcurrentWorkersCount) then
       begin
-        Result:=CreateWorker;
+        Result := CreateWorker;
         Workers.Add(Result);
       end;
 {$IFDEF CODE_SITE}
       if Assigned(Result) then
-        Result.FWorkerIndex:=Workers.IndexOf(Result);
+        Result.FWorkerIndex := Workers.IndexOf(Result);
 {$ENDIF}
     end;
 
-    procedure AddTheSameTasks(StartIndex:Integer);
+    procedure AddTheSameTasks(StartIndex: Integer);
     var
-      SameTaskIndex:Integer;
+      SameTaskIndex: Integer;
     begin
-      SameTaskIndex:=GetSameTaskIndex(SameTasks[0], StartIndex);
+      SameTaskIndex := GetSameTaskIndex(SameTasks[0], StartIndex);
       if SameTaskIndex = -1 then
         Exit;
       repeat
         if Tasks[SameTaskIndex].State = tsUnknown then
           SameTasks.Add(Tasks[SameTaskIndex]);
 
-        SameTaskIndex:=GetSameTaskIndex(SameTasks[0], SameTaskIndex + 1);
+        SameTaskIndex := GetSameTaskIndex(SameTasks[0], SameTaskIndex + 1);
       until SameTaskIndex = -1;
     end;
 
     procedure SetInWorkState;
     var
-      cc:Integer;
+      cc: Integer;
     begin
-      for cc:=0 to SameTasks.Count - 1 do
+      for cc := 0 to SameTasks.Count - 1 do
       begin
-        SameTasks[cc].FProcessingBy:=Worker;
-        SameTasks[cc].FState:=tsInWork;
+        SameTasks[cc].FProcessingBy := Worker;
+        SameTasks[cc].FState := tsInWork;
       end;
     end;
   begin
@@ -1612,25 +1597,25 @@ var
 {$ENDIF}
       Exit;
     end;
-    SameTasks:=TTaskList.Create(FALSE);
+    SameTasks := TTaskList.Create(False);
     BeginWriteTasks;
     try
       if SortTasks and not FTasksSorted then
       begin
         Tasks.Sort(FComparer);
-        FTasksSorted:=TRUE;
+        FTasksSorted := True;
       end;
 {$IFDEF CSM_CHECK_OUTSTANDING_TASKS}
       CodeSite.EnterMethod('Search for outstanding tasks');
 {$ENDIF}
-      TaskIndex:=GetTaskIndex(tsUnknown, 0);
+      TaskIndex := GetTaskIndex(tsUnknown, 0);
       if TaskIndex >= 0 then
       begin
         repeat
 {$IFDEF CSM_CHECK_OUTSTANDING_TASKS}
           CodeSite.SendNote('Outstanding task found on index #%d...', [TaskIndex]);
 {$ENDIF}
-          Worker:=GetReadyWorker;
+          Worker := GetReadyWorker;
           if not Assigned(Worker) then
           begin
 {$IFDEF CSM_CHECK_OUTSTANDING_TASKS}
@@ -1652,10 +1637,10 @@ var
             [Workers.IndexOf(Worker)]);
 {$ENDIF}
 
-          TaskIndex:=GetTaskIndex(tsUnknown, TaskIndex + 1);
+          TaskIndex := GetTaskIndex(tsUnknown, TaskIndex + 1);
         until TaskIndex = -1;
 
-        FDynamicTerminateEnabled:=DemandMode;
+        FDynamicTerminateEnabled := DemandMode;
       end;
 {$IFDEF CSM_CHECK_OUTSTANDING_TASKS}
       CodeSite.ExitMethod('Search for outstanding tasks');
@@ -1671,9 +1656,9 @@ var
 
   procedure UpdateStats;
   var
-    cc:Integer;
+    cc: Integer;
   begin
-    for cc:=0 to FOwnersDoneList.Count - 1 do
+    for cc := 0 to FOwnersDoneList.Count - 1 do
       OwnerAddTasksCount(FOwnersDoneList[cc], 0, 1,
         // Condition for the paramater FireEvents, to minimize the syncs
         (cc = (FOwnersDoneList.Count - 1)) or
@@ -1690,21 +1675,21 @@ var
    *}
   procedure TerminateSleepingWorkers;
   var
-    SleepingWorkerIndex:Integer;
+    SleepingWorkerIndex: Integer;
 
-    function GetSleepingWorkersCount(out FirstSleepingIndex:Integer):Integer;
+    function GetSleepingWorkersCount(out FirstSleepingIndex: Integer):Integer;
     var
-      WorkerIndex:Integer;
+      WorkerIndex: Integer;
     begin
-      Result:=0;
+      Result := 0;
       FirstSleepingIndex:=-1;
-      for WorkerIndex:=0 to Workers.Count - 1 do
+      for WorkerIndex := 0 to Workers.Count - 1 do
         if (Workers[WorkerIndex].State = wsReady) and
           not Workers[WorkerIndex].Terminated then
         begin
           Inc(Result);
           if FirstSleepingIndex = -1 then
-            FirstSleepingIndex:=WorkerIndex;
+            FirstSleepingIndex := WorkerIndex;
         end;
 {$IFDEF CSM_TERMINATE_SLEEPING_WORKERS}
       CodeSite.Send('Sleeping workers count', Result);
@@ -1736,8 +1721,8 @@ begin
   {**
    * Store the boundings for the count of workers, to prevent any side effects for this loop
    *}
-  ConcurrentWorkersCount:=Self.ConcurrentWorkersCount;
-  SpareWorkersCount:=Self.SpareWorkersCount;
+  ConcurrentWorkersCount := Self.ConcurrentWorkersCount;
+  SpareWorkersCount := Self.SpareWorkersCount;
 
   CheckContextProcedures;
   {**
@@ -1760,12 +1745,12 @@ begin
 {$ENDIF}
 end;
 
-function TPoolManager.ExecutionLoopCondition:Boolean;
+function TPoolManager.ExecutionLoopCondition: Boolean;
 begin
   {**
    * Manager is so long active as any workers exists
    *}
-  Result:=not Terminated or (Workers.Count > 0);
+  Result := not Terminated or (Workers.Count > 0);
 end;
 
 procedure TPoolManager.ExecutionLoopFinalize;
@@ -1793,12 +1778,12 @@ end;
  *   destroy.
  * - This method should only be called from the main thread.
  *}
-class procedure TPoolManager.DispatchOwnerDestroyed(Owner:TObject);
+class procedure TPoolManager.DispatchOwnerDestroyed(Owner: TObject);
 var
-  cc, ccc:Integer;
-  CommitsProcessed, CommitsTotal:Integer;
+  cc, ccc: Integer;
+  CommitsProcessed, CommitsTotal: Integer;
 
-  procedure ManagerCommit(PoolManager:TPoolManager);
+  procedure ManagerCommit(PoolManager: TPoolManager);
   begin
     PoolManager.ContextProcedures.Add(
       procedure
@@ -1825,12 +1810,12 @@ begin
     Exit;
   Assert(CurrentThread.ThreadID = MainThreadID, 'Call DispatchOwnerDestroyed from the main thread');
 
-  CommitsProcessed:=0;
-  CommitsTotal:=0;
+  CommitsProcessed := 0;
+  CommitsTotal := 0;
   {**
    * Notify all singleton instances
    *}
-  for cc:=0 to Length(FSingleInstances) - 1 do
+  for cc := 0 to Length(FSingleInstances) - 1 do
     if Assigned(FSingleInstances[cc]) and not FSingleInstances[cc].Terminated then
       ManagerCommit(FSingleInstances[cc]);
   {**
@@ -1843,11 +1828,11 @@ begin
   {**
    * Remove the destroyed owner from all stored owners
    *}
-  for cc:=0 to Length(FStoredOwners) - 1 do
+  for cc := 0 to Length(FStoredOwners) - 1 do
   begin
     if Assigned(FStoredOwners[cc]) and Assigned(FStoredOwners[cc].Owners) then
     begin
-      for ccc:=FStoredOwners[cc].Owners.Count - 1 downto 0 do
+      for ccc := FStoredOwners[cc].Owners.Count - 1 downto 0 do
       begin
         if Assigned(FStoredOwners[cc].Owners[ccc]) and
           (FStoredOwners[cc].Owners[ccc].Owner = Owner) then
@@ -1862,7 +1847,7 @@ end;
 {**
  * Setter for the property ConcurrentWorkersCount
  *}
-procedure TPoolManager.SetConcurrentWorkersCount(ConcurrentWorkersCount:Integer);
+procedure TPoolManager.SetConcurrentWorkersCount(ConcurrentWorkersCount: Integer);
 begin
   if TInterlocked.Exchange(FConcurrentWorkersCount, ConcurrentWorkersCount) <> ConcurrentWorkersCount then
     TriggerMainSignal;
@@ -1871,38 +1856,38 @@ end;
 {**
  * Setter for the property ConcurrentWorkersCountPerCPU
  *}
-procedure TPoolManager.SetConcurrentWorkersCountPerCPU(ConcurrentWorkersCountPerCPU:Integer);
+procedure TPoolManager.SetConcurrentWorkersCountPerCPU(ConcurrentWorkersCountPerCPU: Integer);
 var
-  PerCPUCount:Integer;
+  PerCPUCount: Integer;
 begin
-  PerCPUCount:=ConcurrentWorkersCountPerCPU * GetCPUCount;
+  PerCPUCount := ConcurrentWorkersCountPerCPU * GetCPUCount;
   if PerCPUCount = 0 then
-    PerCPUCount:=2;
-  ConcurrentWorkersCount:=PerCPUCount;
+    PerCPUCount := 2;
+  ConcurrentWorkersCount := PerCPUCount;
 end;
 
 {**
  * Setter for the property SortTasks
  *}
-procedure TPoolManager.SetSortTasks(SortTasks:Boolean);
+procedure TPoolManager.SetSortTasks(SortTasks: Boolean);
 begin
   if SortTasks = Self.SortTasks then
     Exit;
   FreeAndNil(FComparer);
   if SortTasks then
-    FComparer:=TTaskComparer.Create(
-      function(const Left, Right:TPoolTask):Integer
+    FComparer := TTaskComparer.Create(
+      function(const Left, Right: TPoolTask):Integer
       begin
-        Result:=Ord(Assigned(Right)) - Ord(Assigned(Left));
+        Result := Ord(Assigned(Right)) - Ord(Assigned(Left));
         if Result = 0 then
-          Result:=TPoolTaskClass(Left.ClassType).Compare(Left, Right);
+          Result := TPoolTaskClass(Left.ClassType).Compare(Left, Right);
       end);
 end;
 
 {**
  * Setter for the property SpareWorkersCount
  *}
-procedure TPoolManager.SetSpareWorkersCount(SpareWorkersCount:Integer);
+procedure TPoolManager.SetSpareWorkersCount(SpareWorkersCount: Integer);
 begin
   if TInterlocked.Exchange(FSpareWorkersCount, SpareWorkersCount) <> SpareWorkersCount then
     TriggerMainSignal;
@@ -1911,14 +1896,14 @@ end;
 {**
  * Setter for the property SpareWorkersCountPerCPU
  *}
-procedure TPoolManager.SetSpareWorkersCountPerCPU(SpareWorkersCountPerCPU:Integer);
+procedure TPoolManager.SetSpareWorkersCountPerCPU(SpareWorkersCountPerCPU: Integer);
 var
-  PerCPUCount:Integer;
+  PerCPUCount: Integer;
 begin
-  PerCPUCount:=SpareWorkersCountPerCPU * GetCPUCount;
+  PerCPUCount := SpareWorkersCountPerCPU * GetCPUCount;
   if PerCPUCount = 0 then
-    PerCPUCount:=2;
-  SpareWorkersCount:=PerCPUCount;
+    PerCPUCount := 2;
+  SpareWorkersCount := PerCPUCount;
 end;
 
 {**
@@ -1934,52 +1919,52 @@ end;
  * <code>
  * TDerivedManager = class(TPoolManager)
  * public
- *   class function Singleton:TDerivedManager; reintroduce;
+ *   class function Singleton: TDerivedManager; reintroduce;
  * end;
  *
  * implementation
  *
- * class function TDerivedManager.Singleton:TDerivedManager;
+ * class function TDerivedManager.Singleton: TDerivedManager;
  * begin
- *   Result:=TDerivedManager(inherited Singleton); // Don't worried about this hard type cast ;) see the implementation
+ *   Result := TDerivedManager(inherited Singleton); // Don't worried about this hard type cast ;) see the implementation
  * end;
  * </code>
  *}
-class function TPoolManager.Singleton:TPoolManager;
+class function TPoolManager.Singleton: TPoolManager;
 const
   GrowLength = 4;
 var
-  Index, ArrayLength, DemandProcIndex:Integer;
+  Index, ArrayLength, DemandProcIndex: Integer;
 begin
   Assert(Self <> TPoolManager, 'Singleton must be called on a derived class.');
 
-  ArrayLength:=Length(FSingleInstances);
+  ArrayLength := Length(FSingleInstances);
   // Mnemonic: Self is the current class in a class method
-  for Index:=0 to ArrayLength - 1 do
+  for Index := 0 to ArrayLength - 1 do
     if Assigned(FSingleInstances[Index]) and
       (FSingleInstances[Index].ClassType = Self) then
     begin
-      Result:=FSingleInstances[Index];
+      Result := FSingleInstances[Index];
       Exit;
     end;
   {**
    * No single instance exists for the current class, so we have to create a new one
    *}
-  Result:=Self.Create;
-  Result.OnTerminate:=SingletonTerminateGate;
+  Result := Self.Create;
+  Result.OnTerminate := SingletonTerminateGate;
   {**
    * Lookup for a demand "init" proc
    *}
-  DemandProcIndex:=GetDemandProcIndex;
+  DemandProcIndex := GetDemandProcIndex;
   if DemandProcIndex >= 0 then
   begin
-    Result.FDemandMode:=TRUE;
+    Result.FDemandMode := True;
     FDemandProcs[DemandProcIndex].DemandProc(Result);
   end;
   {**
    * Try to find a free position in array
    *}
-  Index:=0;
+  Index := 0;
   while (Index < ArrayLength) and Assigned(FSingleInstances[Index]) do
     Inc(Index);
   {**
@@ -1998,47 +1983,47 @@ end;
  *
  * @see TPoolManager.Singleton
  *}
-class function TPoolManager.HasSingleton:Boolean;
+class function TPoolManager.HasSingleton: Boolean;
 var
-  Index:Integer;
+  Index: Integer;
 begin
   Assert(Self <> TPoolManager, 'HasSingleton must be called on a derived class.');
 
-  Result:=TRUE;
+  Result := True;
 
-  for Index:=0 to Length(FSingleInstances) - 1 do
+  for Index := 0 to Length(FSingleInstances) - 1 do
     if Assigned(FSingleInstances[Index]) and (FSingleInstances[Index].ClassType = Self) then
       Exit;
 
-  Result:=FALSE;
+  Result := False;
 end;
 
-class function TPoolManager.GetDemandProcIndex(ReturnOnFreeIndex:Boolean):Integer;
+class function TPoolManager.GetDemandProcIndex(ReturnOnFreeIndex: Boolean):Integer;
 begin
-  for Result:=0 to Length(FDemandProcs) - 1 do
+  for Result := 0 to Length(FDemandProcs) - 1 do
     if (ReturnOnFreeIndex and not Assigned(FDemandProcs[Result])) or
       (Assigned(FDemandProcs[Result]) and (FDemandProcs[Result].ManagerClass = Self)) then
       Exit;
   Result:=-1;
 end;
 
-class procedure TPoolManager.RegisterSingletonOnDemandProc(DemandProc:TManagerProc);
+class procedure TPoolManager.RegisterSingletonOnDemandProc(DemandProc: TManagerProc);
 var
-  Index:Integer;
+  Index: Integer;
 begin
   Assert(Self <> TPoolManager, 'RegisterSingletonOnDemandProc must be called on a derived class.');
-  Index:=GetDemandProcIndex(TRUE);
+  Index := GetDemandProcIndex(True);
   if Index = -1 then
   begin
-    Index:=Length(FDemandProcs);
+    Index := Length(FDemandProcs);
     SetLength(FDemandProcs, Index + 1);
   end;
   if not Assigned(FDemandProcs[Index]) then
   begin
     FDemandProcs[Index]:=TDemandProcAssign.Create;
-    FDemandProcs[Index].ManagerClass:=Self;
+    FDemandProcs[Index].ManagerClass := Self;
   end;
-  FDemandProcs[Index].DemandProc:=DemandProc;
+  FDemandProcs[Index].DemandProc := DemandProc;
 end;
 
 {**
@@ -2051,14 +2036,14 @@ end;
  *}
 procedure TPoolManager.StoreOwners;
 var
-  Index, ArrLength, cc:Integer;
-  Store:TOwnersAssign;
+  Index, ArrLength, cc: Integer;
+  Store: TOwnersAssign;
 begin
   {**
    * We need no locks, because this method should always be called from the main thread
    *}
-  Index:=0;
-  ArrLength:=Length(FStoredOwners);
+  Index := 0;
+  ArrLength := Length(FStoredOwners);
   {**
    * Try to find the correct class position
    *}
@@ -2070,9 +2055,9 @@ begin
    *}
   if Index = ArrLength then
   begin
-    Store:=TOwnersAssign.Create;
-    Store.ManagerClass:=TPoolManagerClass(ClassType);
-    Index:=ArrLength;
+    Store := TOwnersAssign.Create;
+    Store.ManagerClass := TPoolManagerClass(ClassType);
+    Index := ArrLength;
     SetLength(FStoredOwners, ArrLength + 1);
     FStoredOwners[Index]:=Store;
   end
@@ -2080,14 +2065,14 @@ begin
    * Entry found
    *}
   else
-    Store:=FStoredOwners[Index];
+    Store := FStoredOwners[Index];
 
   if Assigned(Store.Owners) then
     FreeAndNil(Store.Owners);
   {**
    * Remove owners, for which are no events registered and reset the stats
    *}
-  for cc:=Owners.Count - 1 downto 0 do
+  for cc := Owners.Count - 1 downto 0 do
   begin
     if not (Assigned(Owners[cc].OnTasksStatus) or Assigned(Owners[cc].OnTasksComplete)) then
       Owners.Delete(cc)
@@ -2096,19 +2081,19 @@ begin
      *}
     else
     begin
-      Owners[cc].TasksDoneCount:=0;
-      Owners[cc].TasksTotalCount:=0;
+      Owners[cc].TasksDoneCount := 0;
+      Owners[cc].TasksTotalCount := 0;
     end;
   end;
   {**
    * Steal the Owners list
    *}
   if Owners.Count > 0 then
-    Store.Owners:=Owners;
+    Store.Owners := Owners;
   {**
    * There are no further access's on this list, except the Free call in Destroy
    *}
-  FOwners:=nil;
+  FOwners := nil;
 end;
 
 {**
@@ -2120,9 +2105,9 @@ end;
  * Here is a usage example of this method in a demand init proc:
  *
  * <code>
- * procedure PoolInit(Manager:TPoolManager);
+ * procedure PoolInit(Manager: TPoolManager);
  * begin
- *   Manager.ConcurrentWorkersCount:=16;
+ *   Manager.ConcurrentWorkersCount := 16;
  *   if not Manager.RestoreOwners then
  *     Manager.RegisterOwner(Form1, Form1.TasksStatus, Form1.TaskDone);
  * end;
@@ -2133,17 +2118,17 @@ end;
  * @see TPoolManager.RegisterSingletonOnDemandProc
  * @see TPoolManager.RegisterOwner
  *
- * @return TRUE, if there was previously any owners stored, otherwise FALSE is returned.
+ * @return True, if there was previously any owners stored, otherwise False is returned.
  *}
-function TPoolManager.RestoreOwners:Boolean;
+function TPoolManager.RestoreOwners: Boolean;
 var
-  Index, ArrLength:Integer;
+  Index, ArrLength: Integer;
 begin
   {**
    * We need no locks, because this method should always be called from the main thread
    *}
-  Index:=0;
-  ArrLength:=Length(FStoredOwners);
+  Index := 0;
+  ArrLength := Length(FStoredOwners);
   {**
    * Try to find the correct class position
    *}
@@ -2158,22 +2143,22 @@ begin
    * Reassign the Owners list
    *}
   Owners.Free;
-  FOwners:=FStoredOwners[Index].Owners;
-  FStoredOwners[Index].Owners:=nil;
+  FOwners := FStoredOwners[Index].Owners;
+  FStoredOwners[Index].Owners := nil;
 end;
 
-class function TPoolManager.HasSingletonOnDemandProc:Boolean;
+class function TPoolManager.HasSingletonOnDemandProc: Boolean;
 begin
   Assert(Self <> TPoolManager, 'HasSingletonOnDemandProc must be called on a derived class.');
-  Result:=GetDemandProcIndex >= 0;
+  Result := GetDemandProcIndex >= 0;
 end;
 
 class procedure TPoolManager.UnregisterSingletonOnDemandProc;
 var
-  Index:Integer;
+  Index: Integer;
 begin
   Assert(Self <> TPoolManager, 'UnregisterSingletonOnDemandProc must be called on a derived class.');
-  Index:=GetDemandProcIndex;
+  Index := GetDemandProcIndex;
   if Index >= 0 then
     FreeAndNil(FDemandProcs[Index]);
 end;
@@ -2183,20 +2168,20 @@ end;
  *
  * This method can be called from any thread, because it do a read lock on the task list.
  *}
-function TPoolManager.TaskExists(Task:TPoolTask):Boolean;
+function TPoolManager.TaskExists(Task: TPoolTask):Boolean;
 begin
-  Result:=CustomTaskExists(Task.IsTheSame);
+  Result := CustomTaskExists(Task.IsTheSame);
 end;
 
 {**
  * Return the count of tasks, which have the same passed owner
  *}
-function TPoolManager.TasksCountByOwner(Owner:TObject):Integer;
+function TPoolManager.TasksCountByOwner(Owner: TObject):Integer;
 begin
-  Result:=CustomTaskCounter(
-    function(Task:TPoolTask):Boolean
+  Result := CustomTaskCounter(
+    function(Task: TPoolTask):Boolean
     begin
-      Result:=Task.Owner = Owner;
+      Result := Task.Owner = Owner;
     end);
 end;
 
@@ -2205,12 +2190,12 @@ begin
   ContextProcedures.Add(
     procedure
     var
-      cc:Integer;
+      cc: Integer;
     begin
       {**
        * Terminate all running workers
        *}
-      for cc:=0 to Workers.Count - 1 do
+      for cc := 0 to Workers.Count - 1 do
         Workers[cc].Terminate;
 
       inherited Terminate;
@@ -2220,30 +2205,30 @@ end;
 {**
  * Terminates all singleton instances of the managers and his workers in one step
  *
- * This is useful on application exit. In this case the Wait parameter must be TRUE, because
+ * This is useful on application exit. In this case the Wait parameter must be True, because
  * otherwise all threads are hard killed.
  *
  * This method must called from the context of the main thread.
  *}
-class procedure TPoolManager.TerminateSingletonInstances(Wait:Boolean);
+class procedure TPoolManager.TerminateSingletonInstances(Wait: Boolean);
 var
-  cc, SingleInstancesLength:Integer;
-  AnyTerminateDischarged:Boolean;
+  cc, SingleInstancesLength: Integer;
+  AnyTerminateDischarged: Boolean;
 begin
   Assert(CurrentThread.ThreadID = MainThreadID, 'Call TerminateSingletonInstances from the main thread');
-  SingleInstancesLength:=Length(FSingleInstances);
-  AnyTerminateDischarged:=FALSE;
-  for cc:=0 to SingleInstancesLength - 1 do
+  SingleInstancesLength := Length(FSingleInstances);
+  AnyTerminateDischarged := False;
+  for cc := 0 to SingleInstancesLength - 1 do
     if Assigned(FSingleInstances[cc]) then
     begin
       FSingleInstances[cc].Terminate;
-      AnyTerminateDischarged:=TRUE;
+      AnyTerminateDischarged := True;
     end;
   if not (Wait and AnyTerminateDischarged) then
     Exit;
   repeat
     CheckSynchronize(50);
-    cc:=0;
+    cc := 0;
     while (cc < SingleInstancesLength) and not Assigned(FSingleInstances[cc]) do
       Inc(cc);
   until cc = SingleInstancesLength;
@@ -2254,14 +2239,14 @@ end;
  *
  * Notice: It's always called from the context of the main thread.
  *}
-class procedure TPoolManager.SingletonTerminateGate(Sender:TObject);
+class procedure TPoolManager.SingletonTerminateGate(Sender: TObject);
 var
-  cc:Integer;
+  cc: Integer;
 begin
   {**
    * Remove the connection from FSingleInstances, if one is there
    *}
-  for cc:=0 to Length(FSingleInstances) - 1 do
+  for cc := 0 to Length(FSingleInstances) - 1 do
     if FSingleInstances[cc] = Sender then
     begin
       if FSingleInstances[cc].DemandMode then
@@ -2271,12 +2256,12 @@ begin
     end;
 end;
 
-procedure TPoolManager.UnregisterOwner(Owner:TObject);
+procedure TPoolManager.UnregisterOwner(Owner: TObject);
 begin
   ContextProcedures.Add(
     procedure
     begin
-      Owners.Remove(GetOwner(Owner, FALSE));
+      Owners.Remove(GetOwner(Owner, False));
     end);
 end;
 
@@ -2285,16 +2270,16 @@ end;
  *
  * It's called in TPoolWorker.DoneTask from their thread context
  *}
-procedure TPoolManager.WorkerTaskDone(DoneWorker:TPoolWorker; WorkerState:TWorkerState);
+procedure TPoolManager.WorkerTaskDone(DoneWorker: TPoolWorker; WorkerState: TWorkerState);
 var
-  BlockSignal:TEvent;
+  BlockSignal: TEvent;
 begin
-  BlockSignal:=TEvent.Create(nil, FALSE, FALSE, '');
+  BlockSignal := TEvent.Create(nil, False, False, '');
   try
     ContextProcedures.Add(
       procedure
       var
-        TaskIndex, ProcessedTaskIndex:Integer;
+        TaskIndex, ProcessedTaskIndex: Integer;
       begin
         try
           if WorkerState <> wsTaskDone then
@@ -2305,9 +2290,9 @@ begin
             {**
              * Remove the processed tasks from tasks
              *}
-            for ProcessedTaskIndex:=0 to DoneWorker.ProcessTasks.Count - 1 do
+            for ProcessedTaskIndex := 0 to DoneWorker.ProcessTasks.Count - 1 do
             begin
-              TaskIndex:=Tasks.IndexOf(
+              TaskIndex := Tasks.IndexOf(
                 DoneWorker.ProcessTasks[ProcessedTaskIndex]);
               if TaskIndex >= 0 then
               begin
@@ -2319,7 +2304,7 @@ begin
             EndWriteTasks;
           end;
         finally
-          DoneWorker.State:=wsReady;
+          DoneWorker.State := wsReady;
           BlockSignal.SetEvent;
         end;
       end);
@@ -2334,11 +2319,11 @@ end;
  *
  * It's called in TPoolWorker.ExecutionLoopFinalize automatically.
  *}
-procedure TPoolManager.WorkerTerminated(TerminatedWorker:TPoolWorker);
+procedure TPoolManager.WorkerTerminated(TerminatedWorker: TPoolWorker);
 var
-  BlockSignal:TEvent;
+  BlockSignal: TEvent;
 begin
-  BlockSignal:=TEvent.Create(nil, FALSE, FALSE, '');
+  BlockSignal := TEvent.Create(nil, False, False, '');
   try
     ContextProcedures.Add(
       procedure
@@ -2357,31 +2342,31 @@ end;
 
 {** TThreadProcedures **}
 
-constructor TThreadProcedures.Create(ForeignChangedSignal:TEvent);
+constructor TThreadProcedures.Create(ForeignChangedSignal: TEvent);
 begin
 {$IFDEF USE_SPIN_LOCK}
-  FProceduresLock:=TSpinLock.Create(TRUE);
+  FProceduresLock := TSpinLock.Create(True);
 {$ELSE}
-  FProceduresLock:=TCriticalSection.Create;
+  FProceduresLock := TCriticalSection.Create;
 {$ENDIF}
   if Assigned(ForeignChangedSignal) then
-    FChangedSignal:=ForeignChangedSignal
+    FChangedSignal := ForeignChangedSignal
   else
-    FChangedSignal:=TEvent.Create(nil, FALSE, FALSE, '');
+    FChangedSignal := TEvent.Create(nil, False, False, '');
 
-  FOwnChangedSignal:=ForeignChangedSignal <> FChangedSignal;
+  FOwnChangedSignal := ForeignChangedSignal <> FChangedSignal;
 end;
 
 destructor TThreadProcedures.Destroy;
 var
-  cc:Integer;
+  cc: Integer;
 begin
   {**
    * Possible memory leaks, if we don't reset all references of closures
    *}
-  for cc:=0 to Length(FProcedures) - 1 do
+  for cc := 0 to Length(FProcedures) - 1 do
     FProcedures[cc]:=nil;
-  FProcedures:=nil;
+  FProcedures := nil;
 {$IFNDEF USE_SPIN_LOCK}
   FProceduresLock.Free;
 {$ENDIF}
@@ -2391,13 +2376,13 @@ begin
   inherited;
 end;
 
-procedure TThreadProcedures.Add(ThreadProcedure:TThreadProcedure);
+procedure TThreadProcedures.Add(ThreadProcedure: TThreadProcedure);
 var
-  Index:Integer;
+  Index: Integer;
 begin
   FProceduresLock.Enter;
   try
-    Index:=Length(FProcedures);
+    Index := Length(FProcedures);
     SetLength(FProcedures, Index + 1);
     FProcedures[Index]:=ThreadProcedure;
   finally
@@ -2416,12 +2401,12 @@ end;
  *
  * @return The count of executed procedures
  *}
-function TThreadProcedures.Execute:Integer;
+function TThreadProcedures.Execute: Integer;
 var
-  cc, ProceduresCount:Integer;
-  LocalProcedures:TThreadProcedureArray;
+  cc, ProceduresCount: Integer;
+  LocalProcedures: TThreadProcedureArray;
 begin
-  Result:=0;
+  Result := 0;
   {**
    * Copy the current added procedures locally and reset FProcedures
    *}
@@ -2429,9 +2414,9 @@ begin
   try
     if not Assigned(FProcedures) then
       Exit;
-    ProceduresCount:=Length(FProcedures);
-    LocalProcedures:=Copy(FProcedures, 0, ProceduresCount);
-    FProcedures:=nil;
+    ProceduresCount := Length(FProcedures);
+    LocalProcedures := Copy(FProcedures, 0, ProceduresCount);
+    FProcedures := nil;
   finally
 {$IFDEF USE_SPIN_LOCK}
     FProceduresLock.Exit;
@@ -2443,31 +2428,31 @@ begin
    * Whole execution is outside the lock, so Add can be further called by other threads
    *}
   try
-    for cc:=0 to ProceduresCount - 1 do
+    for cc := 0 to ProceduresCount - 1 do
     begin
       LocalProcedures[cc]();
       LocalProcedures[cc]:=nil;
       Inc(Result);
     end;
   finally
-    LocalProcedures:=nil;
+    LocalProcedures := nil;
   end;
 end;
 
 {$IFDEF CS_FILE_LOGGING}
 var
-  Dest:TCodeSiteDestination;
+  Dest: TCodeSiteDestination;
 
 initialization
-Dest:=TCodeSiteDestination.Create(nil);
+Dest := TCodeSiteDestination.Create(nil);
 
-Dest.LogFile.Active:=True;
+Dest.LogFile.Active := True;
 Dest.LogFile.FileName:='ThreadPool.csl';
 Dest.LogFile.FilePath:='$(MyDocs)';
-Dest.LogFile.MaxSize:=16 * 1024; // 16 MB
-Dest.LogFile.MaxParts:=2;
+Dest.LogFile.MaxSize := 16 * 1024; // 16 MB
+Dest.LogFile.MaxParts := 2;
 
-CodeSite.Destination:=Dest;
+CodeSite.Destination := Dest;
 
 finalization
 Dest.Free;
