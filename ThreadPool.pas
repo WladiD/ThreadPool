@@ -389,9 +389,6 @@ type
     FSingleInstances: array of TPoolManager;
     FDemandProcs: array of TDemandProcAssign;
     FStoredOwners: array of TOwnersAssign;
-{$IFNDEF COMPILER_15_UP}
-    FCPUCount: Cardinal; // Is already stored in a TThread field since Delphi XE
-{$ENDIF}
 
     class function GetDemandProcIndex(ReturnOnFreeIndex: Boolean = False):Integer;
     class function GetCPUCount: Integer;
@@ -1376,13 +1373,7 @@ end;
 
 class function TPoolManager.GetCPUCount: Integer;
 begin
-{$IFDEF COMPILER_15_UP}
-  Result := ProcessorCount; // ProcessorCount is available since Delphi XE
-{$ELSE}
-  if FCPUCount = 0 then
-    FCPUCount := System.CPUCount;
-  Result := FCPUCount;
-{$ENDIF}
+  Result := ProcessorCount;
 end;
 
 {**
