@@ -2,8 +2,8 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'HTTPThreadPool-TestSuite'
-  ClientHeight = 470
-  ClientWidth = 635
+  ClientHeight = 526
+  ClientWidth = 632
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,11 +17,16 @@ object MainForm: TMainForm
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
-    Top = 317
-    Width = 635
+    Top = 373
+    Width = 632
     Height = 153
     Align = alBottom
     TabOrder = 0
+    ExplicitTop = 317
+    ExplicitWidth = 635
+    DesignSize = (
+      632
+      153)
     object Label1: TLabel
       Left = 8
       Top = 6
@@ -34,6 +39,7 @@ object MainForm: TMainForm
       Top = 6
       Width = 95
       Height = 13
+      Anchors = [akTop, akRight]
       Caption = 'Concurrent workers'
     end
     object Label3: TLabel
@@ -41,6 +47,7 @@ object MainForm: TMainForm
       Top = 51
       Width = 69
       Height = 13
+      Anchors = [akTop, akRight]
       Caption = 'Spare workers'
     end
     object URLMemo: TMemo
@@ -48,43 +55,37 @@ object MainForm: TMainForm
       Top = 24
       Width = 377
       Height = 121
+      Anchors = [akLeft, akTop, akRight]
       Lines.Strings = (
-        'http://www.spiegel.de/'
-        'http://www.spiegel.de/politik/'
-        'http://www.spiegel.de/politik/deutschland/'
-        'http://www.spiegel.de/politik/ausland/'
-        'http://www.spiegel.de/wirtschaft/'
-        'http://www.spiegel.de/wirtschaft/service/'
-        'http://www.spiegel.de/wirtschaft/unternehmen/'
-        'http://www.spiegel.de/wirtschaft/soziales/'
-        'http://www.spiegel.de/panorama/'
-        'http://www.spiegel.de/panorama/justiz/'
-        'http://www.spiegel.de/panorama/leute/'
-        'http://www.spiegel.de/panorama/gesellschaft/'
-        'http://www.spiegel.de/sport/'
-        'http://www.spiegel.de/sport/fussball/'
-        'http://www.spiegel.de/sport/formel1/'
-        'http://www.spiegel.de/sport/wintersport/'
-        'http://www.spiegel.de/kultur/'
-        'http://www.spiegel.de/kultur/kino/'
-        'http://www.spiegel.de/kultur/musik/'
-        'http://www.spiegel.de/kultur/tv/'
-        'http://www.spiegel.de/kultur/literatur/'
-        'http://www.spiegel.de/netzwelt/'
-        'http://www.spiegel.de/netzwelt/netzpolitik/'
-        'http://www.spiegel.de/netzwelt/web/'
-        'http://www.spiegel.de/netzwelt/gadgets/'
-        'http://www.spiegel.de/netzwelt/games/'
-        'http://www.spiegel.de/wissenschaft/'
-        'http://www.spiegel.de/wissenschaft/mensch/'
-        'http://www.spiegel.de/wissenschaft/natur/'
-        'http://www.spiegel.de/wissenschaft/technik/'
-        'http://www.spiegel.de/wissenschaft/weltall/'
-        'http://www.spiegel.de/wissenschaft/medizin/'
-        'http://www.spiegel.de/unispiegel/'
-        'http://www.spiegel.de/schulspiegel/'
-        'http://www.spiegel.de/reise/'
-        'http://www.spiegel.de/auto/')
+        'https://www.tagesschau.de/'
+        'https://www.tagesschau.de/inland/'
+        'https://www.tagesschau.de/inland/innenpolitik/'
+        'https://www.tagesschau.de/inland/gesellschaft/'
+        'https://www.tagesschau.de/regional/'
+        'https://www.tagesschau.de/inland/deutschlandtrend/'
+        'https://www.tagesschau.de/wahl/'
+        'https://www.tagesschau.de/ausland/'
+        'https://www.tagesschau.de/ausland/europa/'
+        'https://www.tagesschau.de/ausland/amerika/'
+        'https://www.tagesschau.de/ausland/afrika/'
+        'https://www.tagesschau.de/ausland/asien/'
+        'https://www.tagesschau.de/ausland/ozeanien/'
+        'https://www.tagesschau.de/wirtschaft/'
+        'https://www.tagesschau.de/wirtschaft/boersenkurse/'
+        'https://www.tagesschau.de/wirtschaft/finanzen/'
+        'https://www.tagesschau.de/wirtschaft/unternehmen/'
+        'https://www.tagesschau.de/wirtschaft/verbraucher/'
+        'https://www.tagesschau.de/wirtschaft/technologie/'
+        'https://www.tagesschau.de/wirtschaft/konjunktur/'
+        'https://www.tagesschau.de/wirtschaft/weltwirtschaft/'
+        'https://www.tagesschau.de/investigativ/'
+        'https://www.tagesschau.de/faktenfinder/'
+        'https://www.tagesschau.de/wetter/'
+        'https://www.tagesschau.de/multimedia/'
+        'https://www.tagesschau.de/multimedia/livestreams/'
+        'https://www.tagesschau.de/100sekunden/'
+        'https://www.tagesschau.de/multimedia/letzte_sendung/'
+        'https://www.tagesschau.de/sendung/tagesschau/')
       ScrollBars = ssBoth
       TabOrder = 0
     end
@@ -93,6 +94,7 @@ object MainForm: TMainForm
       Top = 88
       Width = 98
       Height = 25
+      Anchors = [akTop, akRight]
       Caption = 'Add tasks'
       TabOrder = 1
       OnClick = AddTasksButtonClick
@@ -102,6 +104,7 @@ object MainForm: TMainForm
       Top = 119
       Width = 98
       Height = 25
+      Anchors = [akTop, akRight]
       Caption = 'Cancel tasks'
       TabOrder = 2
       OnClick = CancelTasksButtonClick
@@ -111,6 +114,7 @@ object MainForm: TMainForm
       Top = 128
       Width = 121
       Height = 17
+      Anchors = [akTop, akRight]
       TabOrder = 3
     end
     object ConcurrentWorkersEdit: TSpinEdit
@@ -118,6 +122,7 @@ object MainForm: TMainForm
       Top = 23
       Width = 121
       Height = 22
+      Anchors = [akTop, akRight]
       MaxValue = 0
       MinValue = 0
       TabOrder = 4
@@ -128,6 +133,7 @@ object MainForm: TMainForm
       Top = 70
       Width = 121
       Height = 22
+      Anchors = [akTop, akRight]
       MaxValue = 0
       MinValue = 0
       TabOrder = 5
@@ -137,10 +143,12 @@ object MainForm: TMainForm
   object LogMemo: TMemo
     Left = 0
     Top = 0
-    Width = 635
-    Height = 317
+    Width = 632
+    Height = 373
     Align = alClient
     ScrollBars = ssVertical
     TabOrder = 1
+    ExplicitWidth = 635
+    ExplicitHeight = 317
   end
 end
