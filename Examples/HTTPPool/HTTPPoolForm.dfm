@@ -106,34 +106,32 @@ object MainForm: TMainForm
       TabOrder = 2
       OnClick = CancelTasksButtonClick
     end
-    object ConcurrentWorkersEdit: TJvSpinEdit
-      Left = 391
-      Top = 24
-      Width = 121
-      Height = 21
-      CheckMinValue = True
-      ButtonKind = bkClassic
-      Value = 10.000000000000000000
-      TabOrder = 3
-      OnChange = ConcurrentWorkersEditChange
-    end
-    object SpareWorkersEdit: TJvSpinEdit
-      Left = 391
-      Top = 70
-      Width = 121
-      Height = 21
-      CheckMinValue = True
-      ButtonKind = bkClassic
-      Value = 5.000000000000000000
-      TabOrder = 4
-      OnChange = SpareWorkersEditChange
-    end
     object ProgressBar: TProgressBar
       Left = 391
       Top = 128
       Width = 121
       Height = 17
+      TabOrder = 3
+    end
+    object ConcurrentWorkersEdit: TSpinEdit
+      Left = 391
+      Top = 23
+      Width = 121
+      Height = 22
+      MaxValue = 0
+      MinValue = 0
+      TabOrder = 4
+      Value = 10
+    end
+    object SpareWorkersEdit: TSpinEdit
+      Left = 391
+      Top = 70
+      Width = 121
+      Height = 22
+      MaxValue = 0
+      MinValue = 0
       TabOrder = 5
+      Value = 5
     end
   end
   object LogMemo: TMemo
