@@ -23,43 +23,6 @@
  * All Rights Reserved.
  *
  *
- * Change log
- *
- * 1.0.6 / 2011-01-27
- * - TPoolManager.DispatchOwnerDestroyed is now atomic
- *
- * 1.0.5 / 2011-01-13
- * - TThreadProcedures introduced for thread safe transport of TThreadProcedure
- * - Some synchronizations between the manager and his workers
- * - New class method TThreadManager.TerminateSingletonInstances for sure termination of
- *   all managers and his workers
- *
- * 1.0.4 / 2011-01-05
- * - TPoolWorker.DoneTask parameter changed to Successful:Boolean
- *
- * 1.0.3 / 2010-12-31 (I wish you a successful new year ;-)
- * - Revised termination synchronization between the manager and his workers
- *   Is much safer and faster now, because the MREW sync is not obtained from
- *   the thread context of the worker.
- * - Code rationalization
- *   Lesser locks and code with the same functionality
- *
- * 1.0.2 / 2010-12-28
- * - Support for named threads (if the conditional symbol DEBUG is defined)
- * - Task sort optimized
- * - "Execution Loop" concept is introduced in TPoolThread
- * - CodeSite integration
- * - Some bugfix and code reorganization
- *
- * 1.0.1 / 2010-12-16
- * - Priorities for tasks and their handling in manager implemented
- * - Some optimizing
- *
- * 1.0.0 / 2010-12-14
- * - First release
- * - Working successful and exactly as designed in examples
- *
- *
  * @author Waldemar Derr <furevest@gmail.com>
  *}
 unit ThreadPool;
@@ -69,9 +32,17 @@ interface
 {$INCLUDE Compile.inc}
 
 uses
-  SysUtils, Generics.Defaults, Generics.Collections, Contnrs, SyncObjs, Windows, Classes, Forms
-{$IFDEF CODE_SITE}
-  , CodeSiteLogging
+{$IFDEF MSWINDOWS}
+  Winapi.Windows, // Just to avoid compiler hints on Windows, ThreadPool is still platform independant
+{$ENDIF}
+  System.SysUtils,
+  Generics.Defaults,
+  Generics.Collections,
+  System.Contnrs,
+  System.SyncObjs,
+  System.Classes
+{$IFDEF CODE_SITE},
+  CodeSiteLogging
 {$ENDIF};
 
 const
@@ -1843,11 +1814,7 @@ var
            *}
           PoolManager.ContextProcedures.Execute;
         finally
-{$IFDEF COMPILER_15_UP}
           TInterlocked.Increment(CommitsProcessed);
-{$ELSE}
-          InterlockedIncrement(CommitsProcessed);
-{$ENDIF}
         end;
       end);
     Inc(CommitsTotal);
@@ -1897,7 +1864,7 @@ end;
  *}
 procedure TPoolManager.SetConcurrentWorkersCount(ConcurrentWorkersCount:Integer);
 begin
-  if InterlockedExchange(FConcurrentWorkersCount, ConcurrentWorkersCount) <> ConcurrentWorkersCount then
+  if TInterlocked.Exchange(FConcurrentWorkersCount, ConcurrentWorkersCount) <> ConcurrentWorkersCount then
     TriggerMainSignal;
 end;
 
@@ -1937,7 +1904,7 @@ end;
  *}
 procedure TPoolManager.SetSpareWorkersCount(SpareWorkersCount:Integer);
 begin
-  if InterlockedExchange(FSpareWorkersCount, SpareWorkersCount) <> SpareWorkersCount then
+  if TInterlocked.Exchange(FSpareWorkersCount, SpareWorkersCount) <> SpareWorkersCount then
     TriggerMainSignal;
 end;
 
