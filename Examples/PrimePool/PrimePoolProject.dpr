@@ -2,7 +2,7 @@ program PrimePoolProject;
 
 uses
   Forms,
-  PrimePoolForm in 'PrimePoolForm.pas' {Form1},
+  PrimePoolForm in 'PrimePoolForm.pas' {MainForm},
   ThreadPool in '..\..\ThreadPool.pas';
 
 {$R *.res}
@@ -10,6 +10,6 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.
